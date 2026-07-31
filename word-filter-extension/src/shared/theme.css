@@ -44,6 +44,7 @@
   --light-checker: #cccccc;             /* 컬러 칩 체크무늬 */
   --light-preview-checker: #e2e2e2;     /* 미리보기 체크무늬 */
   --light-preview-line-edge: #d4d4d4;   /* 미리보기 줄 구분선 */
+  --light-surface-hover: #dedede;        /* 버튼·탭 호버 배경 */
 
   --dark-paper: #171717;
   --dark-paper-raised: #1f1f1f;
@@ -65,6 +66,7 @@
   --dark-checker: #3d3d3d;
   --dark-preview-checker: #2b2b2b;
   --dark-preview-line-edge: #363636;
+  --dark-surface-hover: #363636;
 
   /* ── 기본 매핑: 라이트 ── */
   --paper: var(--light-paper);
@@ -87,6 +89,13 @@
   --checker: var(--light-checker);
   --preview-checker: var(--light-preview-checker);
   --preview-line-edge: var(--light-preview-line-edge);
+  --surface-hover: var(--light-surface-hover);
+
+  /* ── 모서리 반경: 요소 크기에 맞춰 단계를 나눈다 ── */
+  --radius-sm: 3px;      /* 인라인 칩·배지·작은 스와치 */
+  --radius-md: 6px;      /* 버튼·입력창·목록 항목·안내 블록 */
+  --radius-lg: 10px;     /* 패널·카드처럼 큰 영역 */
+  --radius-pill: 999px;  /* 스위치처럼 완전히 둥근 것 */
 
   --font-display: 'Arial Black', 'Arial Bold', 'Malgun Gothic', sans-serif;
   --font-body: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
@@ -125,6 +134,7 @@
     --checker: var(--dark-checker);
     --preview-checker: var(--dark-preview-checker);
     --preview-line-edge: var(--dark-preview-line-edge);
+    --surface-hover: var(--dark-surface-hover);
   }
 }
 
@@ -157,6 +167,7 @@
   --checker: var(--dark-checker);
   --preview-checker: var(--dark-preview-checker);
   --preview-line-edge: var(--dark-preview-line-edge);
+  --surface-hover: var(--dark-surface-hover);
 }
 
 * {
@@ -167,6 +178,7 @@
 
 .button {
   border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   background: var(--paper-raised);
   color: var(--ink);
   font-family: var(--font-body);
@@ -182,9 +194,21 @@
   color: var(--text-on-inverse);
 }
 
-.button--primary:hover {
+/* 호버 색이 따로 없던 버튼은 배경만 한 단계 다른 회색으로 바뀐다.
+   :not(:disabled) 로 명시도를 맞춰 두어야 아래 파랑 호버가 이 규칙에 덮이지 않는다. */
+.button:not(:disabled):hover {
+  background: var(--surface-hover);
+}
+
+.button--primary:not(:disabled):hover {
   background: var(--accent);
   color: var(--text-on-accent);
+}
+
+/* 누를 수 없는 버튼은 호버 반응도 없어야 한다 */
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .button:focus-visible {
@@ -211,6 +235,7 @@
 .switch__track {
   position: relative;
   display: block;
+  border-radius: var(--radius-pill);
   width: var(--switch-track-width);
   height: var(--switch-track-height);
   border: 1px solid var(--border);
@@ -219,6 +244,7 @@
 
 .switch__knob {
   position: absolute;
+  border-radius: var(--radius-pill);
   top: 2px;
   left: 2px;
   width: var(--switch-knob-size);
@@ -260,6 +286,7 @@
 
 .panel {
   border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
   background: var(--paper-raised);
   padding: 22px 24px 26px;
   margin-bottom: 22px;
@@ -305,6 +332,7 @@
 }
 
 .status--done {
+  border-radius: var(--radius-sm);
   color: var(--text-on-accent);
   background: var(--accent);
   display: inline-block;
@@ -323,7 +351,8 @@
 .word-item {
   display: flex;
   align-items: stretch;
-  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
   background: var(--surface-inverse);
 }
 
@@ -347,6 +376,7 @@
 
 .word-item__cover {
   position: absolute;
+  border-radius: var(--radius-sm);
   inset: 4px 6px;
   background: var(--surface-inverse);
   opacity: 1;
@@ -399,20 +429,9 @@
   color: var(--text-on-inverse);
 }
 
-.word-item--regex {
-  border-left-color: var(--accent);
-}
-
+/* 타입 구분은 배지 글자색으로만 한다 */
 .word-item--regex .word-item__type {
   color: var(--accent-on-inverse);
-}
-
-.word-item--text {
-  border-left-color: var(--ink-soft);
-}
-
-.word-item--site {
-  border-left-color: var(--accent);
 }
 
 .word-item--site .word-item__text {
@@ -425,6 +444,8 @@
 .type-select {
   display: inline-flex;
   border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .type-option {
@@ -449,6 +470,10 @@
   color: var(--ink-soft);
 }
 
+.type-option__label:hover {
+  background: var(--surface-hover);
+}
+
 .type-option + .type-option .type-option__label {
   border-left: 1px solid var(--border);
 }
@@ -458,17 +483,19 @@
   color: var(--text-on-inverse);
 }
 
+/* 컨테이너가 overflow: hidden 이라 바깥쪽 포커스 링은 잘린다. 안쪽으로 그린다. */
 .type-option:has(input:focus-visible) {
   outline: 3px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: -3px;
 }
 
 .regex-feedback {
+  border-radius: var(--radius-md);
   margin: 8px 0 0;
   padding: 7px 10px;
   font-family: var(--font-mono);
   font-size: 12px;
-  border-left: 4px solid var(--accent);
+  border: 1px solid var(--border-soft);
   background: var(--paper-input);
   color: var(--ink-soft);
   word-break: break-all;
@@ -479,7 +506,7 @@
 }
 
 .regex-feedback--invalid {
-  border-left-color: var(--stamp);
+  border-color: var(--stamp);
   color: var(--stamp);
   font-weight: 700;
 }
@@ -497,6 +524,7 @@
 }
 
 .pattern-form__input {
+  border-radius: var(--radius-md);
   flex: 1 1 auto;
   min-width: 0;
   border: 1px solid var(--border);

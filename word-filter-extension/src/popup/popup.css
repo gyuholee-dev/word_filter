@@ -41,6 +41,7 @@ body {
   text-transform: uppercase;
 }
 
+/* 옵션 화면 로고와 같은 각진 먹칠 바 */
 .popup-head__mark-bar {
   background: var(--surface-inverse);
   color: var(--text-on-inverse);
@@ -51,6 +52,7 @@ body {
 
 .tally {
   border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
   background: var(--paper-raised);
   padding: 12px 14px 14px;
   margin: 0 0 12px;
@@ -110,6 +112,7 @@ body {
 }
 
 .quick-add__input {
+  border-radius: var(--radius-md);
   flex: 1 1 auto;
   min-width: 0;
   border: 1px solid var(--border);
@@ -123,11 +126,6 @@ body {
 .quick-add__input:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: -1px;
-}
-
-.button--ghost:hover {
-  background: var(--surface-inverse);
-  color: var(--text-on-inverse);
 }
 
 .popup-status {
@@ -180,6 +178,7 @@ body {
 
 .mode-line__swatch {
   position: relative;
+  border-radius: var(--radius-sm);
   width: 16px;
   height: 16px;
   border: 1px solid var(--border);
@@ -191,6 +190,7 @@ body {
 
 .mode-line__swatch::after {
   content: '';
+  border-radius: inherit;
   position: absolute;
   inset: 0;
   background-color: var(--current-filter-color, transparent);
@@ -202,16 +202,12 @@ body {
   color: var(--ink-soft);
 }
 
-.button--ghost:hover {
-  background: var(--surface-inverse);
-  color: var(--text-on-inverse);
-}
-
 /* 이 사이트가 예외로 등록되어 있을 때만 보이는 안내 */
 .excluded-note {
+  border-radius: var(--radius-md);
   margin: 0 0 12px;
   padding: 8px 10px;
-  border-left: 4px solid var(--accent);
+  border: 1px solid var(--border-soft);
   background: var(--paper-input);
   font-size: 12px;
   color: var(--ink-soft);

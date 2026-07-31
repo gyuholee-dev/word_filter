@@ -16,6 +16,7 @@ body {
 }
 
 code {
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.92em;
   background: var(--surface-inverse);
@@ -80,6 +81,7 @@ code {
   text-transform: uppercase;
 }
 
+/* 먹칠 바는 각진 모양이 로고 정체성이므로 반경을 넣지 않는다 */
 .masthead__redacted {
   background: var(--surface-inverse);
   color: var(--text-on-inverse);
@@ -145,13 +147,6 @@ code {
 
 /* ── 토글 스위치 ────────────────────────────────────────────────────────── */
 
-.switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  flex: 0 0 auto;
-}
 
 /* ── 슬라이더 ───────────────────────────────────────────────────────────── */
 
@@ -173,6 +168,7 @@ code {
 }
 
 .slider__value {
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 13px;
   background: var(--surface-inverse);
@@ -186,6 +182,7 @@ code {
 
 .preview {
   border: 1px dashed var(--border-soft);
+  border-radius: var(--radius-md);
   padding: 8px 14px;
   background: var(--paper-input);
 }
@@ -215,12 +212,17 @@ code {
 
 .mode-option {
   display: block;
+  border-radius: var(--radius-md);
   position: relative;
   border: 1px solid var(--border-soft);
-  border-left: 4px solid var(--border-soft);
   padding: 12px 14px;
   cursor: pointer;
   background: var(--paper-input);
+}
+
+/* 선택된 타일 규칙(:has)이 명시도가 더 높아 이 호버에 덮이지 않는다 */
+.mode-option:hover {
+  background: var(--surface-hover);
 }
 
 .mode-option input {
@@ -253,7 +255,6 @@ code {
 .mode-option:has(input:checked) {
   background: var(--surface-inverse);
   border-color: var(--surface-inverse);
-  border-left-color: var(--accent);
 }
 
 .mode-option:has(input:checked) .mode-option__name {
@@ -279,6 +280,7 @@ code {
 }
 
 .rgb-input__swatch {
+  border-radius: var(--radius-md);
   width: 52px;
   height: 40px;
   padding: 0;
@@ -301,6 +303,7 @@ code {
 }
 
 .rgb-input__channel input {
+  border-radius: var(--radius-md);
   width: 72px;
   border: 1px solid var(--border);
   background: var(--paper-input);
@@ -328,6 +331,7 @@ code {
 /* 현재 컬러 칩: 체크 무늬 위에 색을 올려 Opacity 가 낮을 때의 투명도를 보여 준다 */
 
 .color-actions__chip {
+  border-radius: var(--radius-sm);
   width: 42px;
   height: 26px;
   border: 1px solid var(--border);
@@ -340,6 +344,7 @@ code {
 
 .color-actions__chip::after {
   content: '';
+  border-radius: inherit;
   position: absolute;
   inset: 0;
   background-color: var(--current-filter-color, transparent);
@@ -371,9 +376,10 @@ code {
 /* ── 백업 및 복원 ───────────────────────────────────────────────────────── */
 
 .transfer-note {
+  border-radius: var(--radius-md);
   margin: 0;
   padding: 10px 12px;
-  border-left: 4px solid var(--accent);
+  border: 1px solid var(--border-soft);
   background: var(--paper-input);
   font-size: 12px;
   color: var(--ink-soft);
@@ -412,12 +418,14 @@ code {
 
 /* 켜짐/꺼짐 글자 길이가 달라도 스위치가 흔들리지 않도록 폭을 고정한다 */
 
-.switch__state {
-  min-width: 60px;
-}
-
+/* 공용 스위치에 옵션 화면에서만 필요한 값을 더한다.
+   켜짐/꺼짐 글자 길이가 달라도 흔들리지 않도록 폭을 고정한다. */
 .switch {
   flex: 0 0 auto;
+}
+
+.switch__state {
+  min-width: 60px;
 }
 
 /* 예외 사이트 항목. 도메인은 읽어야 하는 값이라 먹칠하지 않는다 */
