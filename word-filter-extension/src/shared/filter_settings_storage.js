@@ -56,6 +56,17 @@
    */
   const MAX_PATTERN_COUNT = 100;
 
+  /**
+   * 화면 테마.
+   *  - SYSTEM : 크롬(운영체제) 설정을 따른다
+   *  - LIGHT / DARK : 시스템 설정과 무관하게 고정한다
+   */
+  const THEME_PREFERENCE = Object.freeze({
+    SYSTEM: 'system',
+    LIGHT: 'light',
+    DARK: 'dark',
+  });
+
   /** 예외로 등록할 수 있는 사이트 최대 개수 (저장 용량 한도를 넘지 않도록) */
   const MAX_EXCLUDED_SITE_COUNT = 100;
 
@@ -116,6 +127,8 @@
     shouldMatchCaseSensitively: false,
     /** 필터링을 하지 않을 사이트 호스트 목록 (예: ['example.com']) */
     excludedSiteList: [],
+    /** 설정 화면·팝업·편집 페이지의 테마 (THEME_PREFERENCE 중 하나) */
+    themePreference: THEME_PREFERENCE.SYSTEM,
   });
 
   // ───────────────────────── 컬러 유틸 ─────────────────────────
@@ -403,6 +416,9 @@
           ? storedSettings.shouldMatchCaseSensitively
           : DEFAULT_FILTER_SETTINGS.shouldMatchCaseSensitively,
       excludedSiteList: normalizeExcludedSiteList(storedSettings.excludedSiteList),
+      themePreference: Object.values(THEME_PREFERENCE).includes(storedSettings.themePreference)
+        ? storedSettings.themePreference
+        : DEFAULT_FILTER_SETTINGS.themePreference,
     };
   }
 
@@ -652,6 +668,7 @@
     MAX_PATTERN_LENGTH,
     MAX_PATTERN_COUNT,
     MAX_EXCLUDED_SITE_COUNT,
+    THEME_PREFERENCE,
     DEFAULT_FILTER_COLOR,
     DEFAULT_FILTER_SETTINGS,
     validateRegexPattern,

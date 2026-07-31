@@ -1,15 +1,16 @@
 /* ===========================================================================
-   theme.css — 설정 화면과 팝업이 공유하는 테마 토큰과 공통 컴포넌트
+   theme.css — 설정 화면 · 팝업 · 패턴 편집 페이지가 공유하는 테마와 공통 컴포넌트
    ---------------------------------------------------------------------------
-   두 화면이 같은 색과 같은 컨트롤 모양을 쓰므로 한 곳에 둔다.
-   각 화면의 고유 스타일은 options.css / popup.css 에 있고, 이 파일보다 나중에
-   불러오므로 필요한 값만 덮어쓸 수 있다.
-
    [토큰을 표면(surface) 기준으로 나눈 이유]
    밝은 패널 위에 "반전 칩"(먹칠 바, 선택된 모드 타일, 기본 버튼)이 올라간다.
    토큰이 --ink 하나뿐이면 그 값이 본문 텍스트색과 반전 칩 배경색을 동시에 담당하게 되어,
    다크모드에서 값을 뒤집는 순간 "반전 칩 위 텍스트" 조합의 명암비가 무너진다.
    그래서 반전 표면에 얹히는 색을 별도 토큰(--*-on-inverse)으로 분리했다.
+
+   [팔레트와 매핑을 나눈 이유]
+   테마는 (1) 시스템 설정 따름 (2) 라이트 고정 (3) 다크 고정 세 가지로 결정된다.
+   각 경우마다 색 값을 다시 적으면 네 곳에 같은 값이 흩어져 어긋나기 쉽다.
+   그래서 값은 --light-* / --dark-* 팔레트에 한 번만 두고, 상황별로 매핑만 바꿔 끼운다.
 
    [명암비]
    모든 조합을 라이트·다크 양쪽에서 계산해 텍스트 4.5:1, UI 요소 3:1 이상을 만족시켰다.
@@ -20,29 +21,64 @@
      이 선언이 없으면 다크모드에서 네이티브 컨트롤만 밝게 남는다. */
   color-scheme: light dark;
 
-  --paper: #e9eaec;        /* 페이지 배경 */
-  --paper-raised: #f4f5f6; /* 패널 배경 */
-  --paper-input: #ffffff;  /* 입력 필드 배경 */
-  --paper-edge: #d3d6db;   /* 얇은 구분선 */
+  /* ── 팔레트: 색 값은 여기에만 적는다 ── */
+  --light-paper: #e9eaec;               /* 페이지 배경 */
+  --light-paper-raised: #f4f5f6;        /* 패널 배경 */
+  --light-paper-input: #ffffff;         /* 입력 필드 배경 */
+  --light-paper-edge: #d3d6db;          /* 얇은 구분선 */
+  --light-ink: #101216;                 /* 본문 텍스트, 강한 테두리 */
+  --light-ink-soft: #565c66;            /* 보조 텍스트 */
+  --light-surface-inverse: #101216;     /* 반전 칩 배경 */
+  --light-text-on-inverse: #e9eaec;     /* 반전 칩 위 텍스트 */
+  --light-muted-on-inverse: #a8adb7;    /* 반전 칩 위 보조 텍스트 */
+  --light-divider-on-inverse: #363c46;  /* 반전 칩 내부 구분선 */
+  --light-accent: #2f7cf6;              /* 포커스 링, 표식, 강조 배경 */
+  --light-accent-on-inverse: #2f7cf6;   /* 반전 칩 위 강조 텍스트 */
+  --light-text-on-accent: #101216;      /* 강조 배경 위 텍스트 */
+  --light-stamp: #c81e3c;               /* 오류 */
+  --light-text-on-stamp: #ffffff;       /* 오류 배경 위 텍스트 */
+  --light-checker: #c9ccd2;             /* 컬러 칩 체크무늬 */
+  --light-preview-checker: #e4e6ea;     /* 미리보기 체크무늬 */
+  --light-preview-line-edge: #cfd3d9;   /* 미리보기 줄 구분선 */
 
-  --ink: #101216;          /* 본문 텍스트, 강한 테두리 */
-  --ink-soft: #565c66;     /* 보조 텍스트 */
+  --dark-paper: #14161a;
+  --dark-paper-raised: #1b1e23;
+  --dark-paper-input: #23272e;
+  --dark-paper-edge: #313742;
+  --dark-ink: #e7e9ee;
+  --dark-ink-soft: #9aa2af;
+  --dark-surface-inverse: #e7e9ee;
+  --dark-text-on-inverse: #14161a;
+  --dark-muted-on-inverse: #4a505a;
+  --dark-divider-on-inverse: #a9b0bb;
+  --dark-accent: #6aa6ff;
+  --dark-accent-on-inverse: #1a52c8;
+  --dark-text-on-accent: #14161a;
+  --dark-stamp: #ff7085;
+  --dark-text-on-stamp: #14161a;
+  --dark-checker: #3a4048;
+  --dark-preview-checker: #2a2f36;
+  --dark-preview-line-edge: #343a43;
 
-  --surface-inverse: #101216;    /* 반전 칩 배경 */
-  --text-on-inverse: #e9eaec;    /* 반전 칩 위 텍스트 */
-  --muted-on-inverse: #a8adb7;   /* 반전 칩 위 보조 텍스트 */
-  --divider-on-inverse: #363c46; /* 반전 칩 내부 구분선 */
-
-  --accent: #2f7cf6;             /* 포커스 링, 표식, 강조 배경 */
-  --accent-on-inverse: #2f7cf6;  /* 반전 칩 위 강조 텍스트 */
-  --text-on-accent: #101216;     /* 강조 배경 위 텍스트 */
-
-  --stamp: #c81e3c;              /* 오류 */
-  --text-on-stamp: #ffffff;      /* 오류 배경 위 텍스트 */
-
-  --checker: #c9ccd2;            /* 컬러 칩 체크무늬 */
-  --preview-checker: #e4e6ea;    /* 미리보기 체크무늬 */
-  --preview-line-edge: #cfd3d9;  /* 미리보기 줄 구분선 */
+  /* ── 기본 매핑: 라이트 ── */
+  --paper: var(--light-paper);
+  --paper-raised: var(--light-paper-raised);
+  --paper-input: var(--light-paper-input);
+  --paper-edge: var(--light-paper-edge);
+  --ink: var(--light-ink);
+  --ink-soft: var(--light-ink-soft);
+  --surface-inverse: var(--light-surface-inverse);
+  --text-on-inverse: var(--light-text-on-inverse);
+  --muted-on-inverse: var(--light-muted-on-inverse);
+  --divider-on-inverse: var(--light-divider-on-inverse);
+  --accent: var(--light-accent);
+  --accent-on-inverse: var(--light-accent-on-inverse);
+  --text-on-accent: var(--light-text-on-accent);
+  --stamp: var(--light-stamp);
+  --text-on-stamp: var(--light-text-on-stamp);
+  --checker: var(--light-checker);
+  --preview-checker: var(--light-preview-checker);
+  --preview-line-edge: var(--light-preview-line-edge);
 
   --font-display: 'Arial Black', 'Arial Bold', 'Malgun Gothic', sans-serif;
   --font-body: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
@@ -56,33 +92,59 @@
   --switch-knob-size: 18px;
 }
 
-/* 크롬의 모양 설정(기기 설정 사용 / 라이트 / 다크)에 따라 자동으로 전환된다. */
+/* 시스템이 다크이고, 사용자가 라이트를 고르지 않았다면 다크로 */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #14161a;
-    --paper-raised: #1b1e23;
-    --paper-input: #23272e;
-    --paper-edge: #313742;
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
 
-    --ink: #e7e9ee;
-    --ink-soft: #9aa2af;
-
-    --surface-inverse: #e7e9ee;
-    --text-on-inverse: #14161a;
-    --muted-on-inverse: #4a505a;
-    --divider-on-inverse: #a9b0bb;
-
-    --accent: #6aa6ff;
-    --accent-on-inverse: #1a52c8;
-    --text-on-accent: #14161a;
-
-    --stamp: #ff7085;
-    --text-on-stamp: #14161a;
-
-    --checker: #3a4048;
-    --preview-checker: #2a2f36;
-    --preview-line-edge: #343a43;
+    --paper: var(--dark-paper);
+    --paper-raised: var(--dark-paper-raised);
+    --paper-input: var(--dark-paper-input);
+    --paper-edge: var(--dark-paper-edge);
+    --ink: var(--dark-ink);
+    --ink-soft: var(--dark-ink-soft);
+    --surface-inverse: var(--dark-surface-inverse);
+    --text-on-inverse: var(--dark-text-on-inverse);
+    --muted-on-inverse: var(--dark-muted-on-inverse);
+    --divider-on-inverse: var(--dark-divider-on-inverse);
+    --accent: var(--dark-accent);
+    --accent-on-inverse: var(--dark-accent-on-inverse);
+    --text-on-accent: var(--dark-text-on-accent);
+    --stamp: var(--dark-stamp);
+    --text-on-stamp: var(--dark-text-on-stamp);
+    --checker: var(--dark-checker);
+    --preview-checker: var(--dark-preview-checker);
+    --preview-line-edge: var(--dark-preview-line-edge);
   }
+}
+
+/* 사용자가 직접 고른 테마가 시스템 설정보다 우선한다.
+   라이트는 기본 매핑이 이미 라이트이므로 color-scheme 만 고정하면 된다. */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --paper: var(--dark-paper);
+  --paper-raised: var(--dark-paper-raised);
+  --paper-input: var(--dark-paper-input);
+  --paper-edge: var(--dark-paper-edge);
+  --ink: var(--dark-ink);
+  --ink-soft: var(--dark-ink-soft);
+  --surface-inverse: var(--dark-surface-inverse);
+  --text-on-inverse: var(--dark-text-on-inverse);
+  --muted-on-inverse: var(--dark-muted-on-inverse);
+  --divider-on-inverse: var(--dark-divider-on-inverse);
+  --accent: var(--dark-accent);
+  --accent-on-inverse: var(--dark-accent-on-inverse);
+  --text-on-accent: var(--dark-text-on-accent);
+  --stamp: var(--dark-stamp);
+  --text-on-stamp: var(--dark-text-on-stamp);
+  --checker: var(--dark-checker);
+  --preview-checker: var(--dark-preview-checker);
+  --preview-line-edge: var(--dark-preview-line-edge);
 }
 
 * {

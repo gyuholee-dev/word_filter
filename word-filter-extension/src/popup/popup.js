@@ -10,6 +10,8 @@
  *   3) "지금 다시 적용"은 SPA 등에서 수동으로 전체 재스캔을 트리거한다.
  */
 (() => {
+  globalThis.wordFilterThemePreference.startFollowingThemePreference();
+
   const {
     loadFilterSettings,
     updateFilterSettings,

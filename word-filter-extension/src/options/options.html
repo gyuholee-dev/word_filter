@@ -13,16 +13,36 @@
   <body>
     <div class="page">
       <header class="masthead">
-        <p class="masthead__eyebrow">Chrome Extension / Content Filter</p>
-        <h1 class="masthead__title">
-          <span class="masthead__word">WORD</span>
-          <span class="masthead__redacted">FILTER</span>
-        </h1>
-        <p class="masthead__lede">
-          등록한 <strong>텍스트 또는 정규표현식</strong>을 찾아 <strong>블록</strong> 또는
-          <strong>단어</strong> 단위로 지정한 컬러로 덮습니다. 엘리먼트를 제거하지 않으므로
-          레이아웃은 그대로 유지됩니다.
-        </p>
+        <div class="masthead__text">
+          <p class="masthead__eyebrow">Chrome Extension / Content Filter</p>
+          <h1 class="masthead__title">
+            <span class="masthead__word">WORD</span>
+            <span class="masthead__redacted">FILTER</span>
+          </h1>
+          <p class="masthead__lede">
+            등록한 <strong>텍스트 또는 정규표현식</strong>을 찾아 <strong>블록</strong> 또는
+            <strong>단어</strong> 단위로 지정한 컬러로 덮습니다. 엘리먼트를 제거하지 않으므로
+            레이아웃은 그대로 유지됩니다.
+          </p>
+        </div>
+
+        <div class="theme-select" role="radiogroup" aria-label="화면 테마">
+          <span class="theme-select__label">테마</span>
+          <div class="type-select">
+            <label class="type-option">
+              <input type="radio" name="themePreferenceRadioGroup" id="systemThemeRadio" value="system" />
+              <span class="type-option__label">시스템</span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="themePreferenceRadioGroup" id="lightThemeRadio" value="light" />
+              <span class="type-option__label">라이트</span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="themePreferenceRadioGroup" id="darkThemeRadio" value="dark" />
+              <span class="type-option__label">다크</span>
+            </label>
+          </div>
+        </div>
       </header>
 
       <section class="panel" aria-labelledby="patternSectionTitle">
@@ -280,6 +300,7 @@
     </div>
 
     <script src="../shared/filter_settings_storage.js"></script>
+    <script src="../shared/theme_preference.js"></script>
     <script src="../shared/filter_apply_helper.js"></script>
     <script src="../shared/pattern_form.js"></script>
     <script src="options.js"></script>

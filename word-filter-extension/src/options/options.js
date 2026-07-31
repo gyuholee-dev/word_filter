@@ -31,12 +31,14 @@
     buildExportFileName,
     FILTER_SETTINGS_STORAGE_KEY,
     FILTERING_MODE,
+    THEME_PREFERENCE,
     MATCH_TYPE,
     MAX_EXCLUDED_SITE_COUNT,
     DEFAULT_FILTER_COLOR,
   } = globalThis.wordFilterSettingsStorage;
 
   const { initializePatternForm } = globalThis.wordFilterPatternForm;
+  const { applyThemePreference } = globalThis.wordFilterThemePreference;
 
   const {
     applyBlockFilterToElement,
@@ -65,6 +67,12 @@
   const restoreSettingsButton = document.getElementById('restoreSettingsButton');
   const restoreFileInput = document.getElementById('restoreFileInput');
   const transferStatusMessage = document.getElementById('transferStatusMessage');
+
+  const themePreferenceRadioList = [
+    document.getElementById('systemThemeRadio'),
+    document.getElementById('lightThemeRadio'),
+    document.getElementById('darkThemeRadio'),
+  ];
 
   const blockModeRadio = document.getElementById('blockModeRadio');
   const wordModeRadio = document.getElementById('wordModeRadio');
@@ -229,6 +237,12 @@
     );
     emptyExcludedSiteMessage.hidden = settings.excludedSiteList.length > 0;
     excludedSiteCountLabel.textContent = `${settings.excludedSiteList.length}개 등록`;
+
+    // 테마
+    themePreferenceRadioList.forEach((themeRadioInput) => {
+      themeRadioInput.checked = themeRadioInput.value === settings.themePreference;
+    });
+    applyThemePreference(settings.themePreference);
 
     // 필터링 모드
     const isWordFilteringMode = settings.filteringMode === FILTERING_MODE.WORD;
@@ -399,6 +413,17 @@
     const hostNameToRemove = deleteButtonElement.dataset.targetHostName ?? '';
     await removeExcludedSite(hostNameToRemove);
     showMessageAt(siteStatusMessage, `${hostNameToRemove} 예외를 해제했습니다.`);
+  });
+
+  // ── 이벤트: 테마 전환 ────────────────────────────────────────────────────
+
+  // 저장하면 storage.onChanged 로 팝업·편집 페이지에도 같은 테마가 적용된다
+  themePreferenceRadioList.forEach((themeRadioInput) => {
+    themeRadioInput.addEventListener('change', async () => {
+      if (!themeRadioInput.checked) return;
+      applyThemePreference(themeRadioInput.value);
+      await updateFilterSettings({ themePreference: themeRadioInput.value });
+    });
   });
 
   // ── 이벤트: 필터링 모드 전환 ─────────────────────────────────────────────

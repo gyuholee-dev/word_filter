@@ -25,8 +25,37 @@ code {
 
 /* ── 헤더 ───────────────────────────────────────────────────────────────── */
 
+/* 소개 문구는 왼쪽, 테마 전환은 오른쪽 아래에 붙인다 */
 .masthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
   margin-bottom: 40px;
+}
+
+.masthead__text {
+  min-width: 0;
+}
+
+.theme-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.theme-select__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.theme-select .type-option__label {
+  padding: 6px 12px;
 }
 
 .masthead__eyebrow {

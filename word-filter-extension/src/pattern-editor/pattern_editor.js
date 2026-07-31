@@ -13,6 +13,8 @@
  * storage.onChanged 를 구독하므로 설정 화면에서 패턴을 추가하면 이 페이지도 바로 갱신된다.
  */
 (() => {
+  globalThis.wordFilterThemePreference.startFollowingThemePreference();
+
   const {
     loadFilterSettings,
     removeFilteredPattern,
