@@ -14,6 +14,7 @@
     loadFilterSettings,
     updateFilterSettings,
     addFilteredPattern,
+    validateRegexPattern,
     formatFilterColorToCssRgba,
     FILTERING_MODE,
     MATCH_TYPE,
@@ -30,20 +31,21 @@
     [FILTERING_MODE.WORD]: '이 페이지에서 처리한 단어',
   };
 
-  const MODE_NAME_BY_MODE = {
-    [FILTERING_MODE.BLOCK]: '블록',
-    [FILTERING_MODE.WORD]: '단어',
-  };
-
   const filteredTargetCountLabel = document.getElementById('filteredTargetCountLabel');
   const filteredTargetCountCaption = document.getElementById('filteredTargetCountCaption');
-  const currentModeValueLabel = document.getElementById('currentModeValueLabel');
+  const excludedSiteNote = document.getElementById('excludedSiteNote');
+  const popupBlockModeRadio = document.getElementById('popupBlockModeRadio');
+  const popupWordModeRadio = document.getElementById('popupWordModeRadio');
   const currentFilterColorSwatch = document.getElementById('currentFilterColorSwatch');
   const currentFilterColorSummary = document.getElementById('currentFilterColorSummary');
   const filteringEnabledCheckbox = document.getElementById('filteringEnabledCheckbox');
   const filteringEnabledStateLabel = document.getElementById('filteringEnabledStateLabel');
   const quickAddWordForm = document.getElementById('quickAddWordForm');
   const quickAddWordInput = document.getElementById('quickAddWordInput');
+  const quickAddRegexForm = document.getElementById('quickAddRegexForm');
+  const quickAddRegexInput = document.getElementById('quickAddRegexInput');
+  const quickAddRegexButton = document.getElementById('quickAddRegexButton');
+  const popupRegexFeedback = document.getElementById('popupRegexFeedback');
   const popupStatusMessage = document.getElementById('popupStatusMessage');
   const openOptionsPageButton = document.getElementById('openOptionsPageButton');
   const reapplyFilterButton = document.getElementById('reapplyFilterButton');
@@ -85,13 +87,24 @@
     });
 
     if (!statusResponse) {
+      excludedSiteNote.hidden = true;
       filteredTargetCountLabel.textContent = '–';
       filteredTargetCountCaption.textContent = '이 탭에는 적용할 수 없습니다';
       return;
     }
+
+    // 예외 사이트에서는 개수가 늘 0 이라 이유를 알려 주지 않으면 고장으로 보인다
+    const isExcludedSite = Boolean(statusResponse.matchedExcludedSite);
+    excludedSiteNote.hidden = !isExcludedSite;
+    if (isExcludedSite) {
+      excludedSiteNote.textContent =
+        `${statusResponse.matchedExcludedSite} 은(는) 예외로 등록되어 필터링하지 않습니다.`;
+    }
+
     filteredTargetCountLabel.textContent = String(statusResponse.filteredTargetCount);
-    filteredTargetCountCaption.textContent =
-      COUNT_CAPTION_BY_MODE[statusResponse.filteringMode] ?? '이 페이지에서 처리한 항목';
+    filteredTargetCountCaption.textContent = isExcludedSite
+      ? '예외 사이트'
+      : (COUNT_CAPTION_BY_MODE[statusResponse.filteringMode] ?? '이 페이지에서 처리한 항목');
   }
 
   /** @param {Awaited<ReturnType<typeof loadFilterSettings>>} settings */
@@ -102,7 +115,9 @@
     // 모드와 무관하게 같은 컬러를 쓰므로 스와치는 항상 보여 준다.
     // 체크 무늬 위에 rgba 를 올려 Opacity 가 낮을 때의 투명도까지 드러나게 한다.
     const cssRgbaColor = formatFilterColorToCssRgba(settings.filterColor);
-    currentModeValueLabel.textContent = MODE_NAME_BY_MODE[settings.filteringMode] ?? '';
+    const isWordFilteringMode = settings.filteringMode === FILTERING_MODE.WORD;
+    popupBlockModeRadio.checked = !isWordFilteringMode;
+    popupWordModeRadio.checked = isWordFilteringMode;
     currentFilterColorSwatch.style.setProperty('--current-filter-color', cssRgbaColor);
     currentFilterColorSwatch.title = cssRgbaColor;
     currentFilterColorSummary.textContent = cssRgbaColor;
@@ -117,6 +132,64 @@
     window.setTimeout(refreshFilteredTargetCount, 120);
   });
 
+  // 모드를 바꾸면 세는 대상(블록 수 ↔ 단어 수)이 달라지므로 개수도 다시 읽는다
+  [popupBlockModeRadio, popupWordModeRadio].forEach((modeRadioInput) => {
+    modeRadioInput.addEventListener('change', async () => {
+      if (!modeRadioInput.checked) return;
+      const settings = await updateFilterSettings({ filteringMode: modeRadioInput.value });
+      renderSettingsToPopup(settings);
+      window.setTimeout(refreshFilteredTargetCount, 120);
+    });
+  });
+
+  /**
+   * 정규식 입력 중 문법을 검사해 결과를 보여 준다.
+   * 잘못된 정규식이면 추가 버튼을 잠가 저장 자체를 막는다. 설정 화면과 같은 규칙이다.
+   */
+  function refreshPopupRegexFeedback() {
+    const currentInputValue = quickAddRegexInput.value.trim();
+
+    if (currentInputValue.length === 0) {
+      popupRegexFeedback.hidden = true;
+      popupRegexFeedback.textContent = '';
+      popupRegexFeedback.classList.remove('regex-feedback--invalid');
+      quickAddRegexButton.disabled = false;
+      return;
+    }
+
+    const validationResult = validateRegexPattern(currentInputValue);
+    popupRegexFeedback.hidden = false;
+    popupRegexFeedback.textContent = validationResult.isValid
+      ? '올바른 정규식입니다.'
+      : validationResult.errorMessage;
+    popupRegexFeedback.classList.toggle('regex-feedback--invalid', !validationResult.isValid);
+    quickAddRegexButton.disabled = !validationResult.isValid;
+  }
+
+  quickAddRegexInput.addEventListener('input', refreshPopupRegexFeedback);
+
+  quickAddRegexForm.addEventListener('submit', async (submitEvent) => {
+    submitEvent.preventDefault();
+
+    const patternToAdd = quickAddRegexInput.value.trim();
+    const { didAdd, reason, errorMessage } = await addFilteredPattern(patternToAdd, MATCH_TYPE.REGEX);
+
+    if (didAdd) {
+      quickAddRegexInput.value = '';
+      refreshPopupRegexFeedback();
+      showPopupStatusMessage(`정규식 "${patternToAdd}" 추가됨`);
+      window.setTimeout(refreshFilteredTargetCount, 120);
+      return;
+    }
+    if (reason === 'invalidRegex') {
+      showPopupStatusMessage(`정규식 오류: ${errorMessage}`, 'error');
+    } else if (reason === 'duplicated') {
+      showPopupStatusMessage('이미 등록된 정규식입니다.', 'error');
+    } else {
+      showPopupStatusMessage('정규식을 입력하세요.', 'error');
+    }
+  });
+
   quickAddWordForm.addEventListener('submit', async (submitEvent) => {
     submitEvent.preventDefault();
     const patternToAdd = quickAddWordInput.value.trim();
@@ -126,7 +199,7 @@
 
     if (didAdd) {
       quickAddWordInput.value = '';
-      showPopupStatusMessage(`"${patternToAdd}" 추가됨`);
+      showPopupStatusMessage(`단어 "${patternToAdd}" 추가됨`);
       window.setTimeout(refreshFilteredTargetCount, 120);
       return;
     }

@@ -22,7 +22,12 @@ body {
   line-height: 1.55;
 }
 
+/* 타이틀과 사용 토글을 한 줄에 양끝으로 배치한다 */
 .popup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 12px;
 }
 
@@ -70,10 +75,17 @@ body {
 }
 
 .popup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 10px 0;
   border-top: 1px solid var(--paper-edge);
-  border-bottom: 1px solid var(--paper-edge);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+/* 좁은 폭에 맞춰 세그먼트 컨트롤을 한 단계 작게 */
+.popup-row .type-option__label {
+  padding: 5px 14px;
 }
 
 /* 빠른 추가 */
@@ -147,6 +159,8 @@ body {
   align-items: center;
   gap: 8px;
   margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--paper-edge);
   font-size: 12px;
 }
 
@@ -191,4 +205,23 @@ body {
 .button--ghost:hover {
   background: var(--surface-inverse);
   color: var(--text-on-inverse);
+}
+
+/* 이 사이트가 예외로 등록되어 있을 때만 보이는 안내 */
+.excluded-note {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-left: 4px solid var(--accent);
+  background: var(--paper-input);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.excluded-note[hidden] {
+  display: none;
+}
+
+/* 두 번째 추가 폼(정규식)은 위 폼과 간격을 둔다 */
+#quickAddRegexForm {
+  margin-top: 10px;
 }

@@ -9,6 +9,12 @@
   <body>
     <header class="popup-head">
       <span class="popup-head__mark">WORD<span class="popup-head__mark-bar">FILTER</span></span>
+
+      <label class="switch">
+        <input type="checkbox" id="filteringEnabledCheckbox" />
+        <span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>
+        <span class="switch__state" id="filteringEnabledStateLabel">사용 중</span>
+      </label>
     </header>
 
     <section class="tally">
@@ -16,23 +22,30 @@
       <p class="tally__caption" id="filteredTargetCountCaption">이 페이지에서 처리한 항목</p>
     </section>
 
-    <p class="mode-line">
+    <p class="excluded-note" id="excludedSiteNote" hidden></p>
+
+    <div class="popup-row">
       <span class="mode-line__label">모드</span>
-      <span class="mode-line__value" id="currentModeValueLabel">블록</span>
+      <div class="type-select" role="radiogroup" aria-label="필터링 모드">
+        <label class="type-option">
+          <input type="radio" name="popupFilteringModeRadioGroup" id="popupBlockModeRadio" value="block" />
+          <span class="type-option__label">블록</span>
+        </label>
+        <label class="type-option">
+          <input type="radio" name="popupFilteringModeRadioGroup" id="popupWordModeRadio" value="word" />
+          <span class="type-option__label">단어</span>
+        </label>
+      </div>
+    </div>
+
+    <p class="mode-line">
+      <span class="mode-line__label">컬러</span>
       <span class="mode-line__swatch" id="currentFilterColorSwatch"></span>
       <span class="mode-line__color" id="currentFilterColorSummary">rgba(0, 0, 0, 1)</span>
     </p>
 
-    <div class="popup-row">
-      <label class="switch">
-        <input type="checkbox" id="filteringEnabledCheckbox" />
-        <span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>
-        <span class="switch__state" id="filteringEnabledStateLabel">사용 중</span>
-      </label>
-    </div>
-
     <form class="quick-add" id="quickAddWordForm" autocomplete="off">
-      <label class="quick-add__label" for="quickAddWordInput">단어 빠르게 추가 (텍스트)</label>
+      <label class="quick-add__label" for="quickAddWordInput">단어 추가 (텍스트)</label>
       <div class="quick-add__row">
         <input
           class="quick-add__input"
@@ -44,6 +57,21 @@
         />
         <button class="button button--primary" type="submit">추가</button>
       </div>
+    </form>
+
+    <form class="quick-add" id="quickAddRegexForm" autocomplete="off">
+      <label class="quick-add__label" for="quickAddRegexInput">정규식 추가</label>
+      <div class="quick-add__row">
+        <input
+          class="quick-add__input"
+          id="quickAddRegexInput"
+          type="text"
+          placeholder="예: \d+화"
+          spellcheck="false"
+        />
+        <button class="button button--primary" type="submit" id="quickAddRegexButton">추가</button>
+      </div>
+      <p class="regex-feedback" id="popupRegexFeedback" role="status" aria-live="polite" hidden></p>
     </form>
 
     <p class="popup-status" id="popupStatusMessage" role="status" aria-live="polite"></p>

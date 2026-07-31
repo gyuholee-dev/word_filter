@@ -18,9 +18,9 @@
   const {
     loadFilterSettings,
     updateFilterSettings,
-    addFilteredPattern,
     removeFilteredPattern,
-    validateRegexPattern,
+    addExcludedSite,
+    removeExcludedSite,
     normalizeFilterSettings,
     formatFilterColorToCssRgba,
     formatFilterColorToHex,
@@ -32,10 +32,11 @@
     FILTER_SETTINGS_STORAGE_KEY,
     FILTERING_MODE,
     MATCH_TYPE,
-    MAX_PATTERN_COUNT,
-    MAX_PATTERN_LENGTH,
+    MAX_EXCLUDED_SITE_COUNT,
     DEFAULT_FILTER_COLOR,
   } = globalThis.wordFilterSettingsStorage;
+
+  const { initializePatternForm } = globalThis.wordFilterPatternForm;
 
   const {
     applyBlockFilterToElement,
@@ -47,32 +48,18 @@
 
   const STATUS_MESSAGE_CLEAR_DELAY_MS = 2600;
 
-  /** 매칭 방식별 입력 안내 문구 */
-  const INPUT_HINT_BY_MATCH_TYPE = {
-    [MATCH_TYPE.TEXT]:
-      '부분 일치로 동작합니다. "결말"을 등록하면 "결말 주의"가 포함된 문단도 처리됩니다.',
-    [MATCH_TYPE.REGEX]:
-      '예) 결말|스포일러  ·  \\d+화  ·  ^\\[광고\\]  ·  시즌\\s?\\d+ · 아래 "대소문자 구분"을 끄면 i 플래그가 함께 적용됩니다.',
-  };
-
-  /** 매칭 방식별 입력창 placeholder */
-  const INPUT_PLACEHOLDER_BY_MATCH_TYPE = {
-    [MATCH_TYPE.TEXT]: '예: 스포일러',
-    [MATCH_TYPE.REGEX]: '예: \\d+화|결말',
-  };
-
   // ── DOM 참조 ─────────────────────────────────────────────────────────────
   const addPatternForm = document.getElementById('addPatternForm');
-  const newPatternInput = document.getElementById('newPatternInput');
-  const textMatchTypeRadio = document.getElementById('textMatchTypeRadio');
-  const regexMatchTypeRadio = document.getElementById('regexMatchTypeRadio');
-  const addPatternButton = document.getElementById('addPatternButton');
-  const patternInputHint = document.getElementById('patternInputHint');
-  const regexFeedbackMessage = document.getElementById('regexFeedbackMessage');
-  const filteredPatternListElement = document.getElementById('filteredPatternList');
-  const emptyPatternListMessage = document.getElementById('emptyPatternListMessage');
+  const openPatternEditorButton = document.getElementById('openPatternEditorButton');
   const registeredPatternCountLabel = document.getElementById('registeredPatternCountLabel');
   const statusMessageElement = document.getElementById('statusMessage');
+
+  const addExcludedSiteForm = document.getElementById('addExcludedSiteForm');
+  const newExcludedSiteInput = document.getElementById('newExcludedSiteInput');
+  const excludedSiteListElement = document.getElementById('excludedSiteList');
+  const emptyExcludedSiteMessage = document.getElementById('emptyExcludedSiteMessage');
+  const excludedSiteCountLabel = document.getElementById('excludedSiteCountLabel');
+  const siteStatusMessage = document.getElementById('siteStatusMessage');
 
   const exportSettingsButton = document.getElementById('exportSettingsButton');
   const restoreSettingsButton = document.getElementById('restoreSettingsButton');
@@ -144,94 +131,32 @@
 
   // ── 렌더링: 단어 목록 ────────────────────────────────────────────────────
 
-  /** 현재 선택된 매칭 방식 */
-  function getSelectedMatchType() {
-    return regexMatchTypeRadio.checked ? MATCH_TYPE.REGEX : MATCH_TYPE.TEXT;
-  }
-
   /**
-   * 패턴 하나를 나타내는 목록 아이템을 만든다.
-   *
-   * innerHTML 을 쓰지 않고 textContent 로만 주입해 사용자 입력이 HTML 로 해석되지 않게 한다.
-   * 정규식 패턴에는 먹칠 커버를 만들지 않는다. 텍스트 패턴은 그 자체가 가려야 할 단어지만,
-   * 정규식은 읽고 고쳐야 하는 값이라 가리면 오히려 불편하다.
-   *
-   * @param {{pattern: string, matchType: string}} filteredPattern
+   * 예외 사이트 한 줄을 만든다. 도메인은 읽고 확인해야 하는 값이라 먹칠하지 않는다.
+   * @param {string} hostName
    * @returns {HTMLLIElement}
    */
-  function createPatternListItemElement({ pattern, matchType }) {
-    const isRegexPattern = matchType === MATCH_TYPE.REGEX;
+  function createExcludedSiteItemElement(hostName) {
+    const siteItemElement = document.createElement('li');
+    siteItemElement.className = 'word-item word-item--site';
 
-    const patternItemElement = document.createElement('li');
-    patternItemElement.className = `word-item ${isRegexPattern ? 'word-item--regex' : 'word-item--text'}`;
+    const siteBarElement = document.createElement('div');
+    siteBarElement.className = 'word-item__bar';
 
-    const typeBadgeElement = document.createElement('span');
-    typeBadgeElement.className = 'word-item__type';
-    typeBadgeElement.textContent = isRegexPattern ? 'REGEX' : 'TEXT';
-
-    const patternBarElement = document.createElement('div');
-    patternBarElement.className = 'word-item__bar';
-
-    const patternTextElement = document.createElement('span');
-    patternTextElement.className = 'word-item__text';
-    patternTextElement.textContent = pattern;
-    patternBarElement.appendChild(patternTextElement);
-
-    if (!isRegexPattern) {
-      const redactionCoverElement = document.createElement('span');
-      redactionCoverElement.className = 'word-item__cover';
-      patternBarElement.appendChild(redactionCoverElement);
-    }
+    const siteTextElement = document.createElement('span');
+    siteTextElement.className = 'word-item__text';
+    siteTextElement.textContent = hostName;
+    siteBarElement.appendChild(siteTextElement);
 
     const deleteButtonElement = document.createElement('button');
     deleteButtonElement.type = 'button';
     deleteButtonElement.className = 'word-item__delete';
     deleteButtonElement.textContent = '삭제';
-    deleteButtonElement.setAttribute('aria-label', `${pattern} 삭제`);
-    // 같은 문자열이 텍스트/정규식으로 둘 다 등록될 수 있어 타입까지 실어 보낸다
-    deleteButtonElement.dataset.targetPattern = pattern;
-    deleteButtonElement.dataset.targetMatchType = matchType;
+    deleteButtonElement.setAttribute('aria-label', `${hostName} 삭제`);
+    deleteButtonElement.dataset.targetHostName = hostName;
 
-    patternItemElement.append(typeBadgeElement, patternBarElement, deleteButtonElement);
-    return patternItemElement;
-  }
-
-  /**
-   * 정규식 입력 중 문법을 실시간으로 검사해 결과를 보여 준다.
-   * 잘못된 정규식이면 추가 버튼을 잠가 저장 자체를 막는다.
-   */
-  function refreshRegexFeedback() {
-    const isRegexSelected = getSelectedMatchType() === MATCH_TYPE.REGEX;
-    const currentInputValue = newPatternInput.value.trim();
-
-    if (!isRegexSelected || currentInputValue.length === 0) {
-      regexFeedbackMessage.hidden = true;
-      regexFeedbackMessage.textContent = '';
-      regexFeedbackMessage.classList.remove('regex-feedback--invalid');
-      addPatternButton.disabled = false;
-      return;
-    }
-
-    const validationResult = validateRegexPattern(currentInputValue);
-    regexFeedbackMessage.hidden = false;
-
-    if (validationResult.isValid) {
-      regexFeedbackMessage.textContent = '올바른 정규식입니다.';
-      regexFeedbackMessage.classList.remove('regex-feedback--invalid');
-      addPatternButton.disabled = false;
-      return;
-    }
-    regexFeedbackMessage.textContent = validationResult.errorMessage;
-    regexFeedbackMessage.classList.add('regex-feedback--invalid');
-    addPatternButton.disabled = true;
-  }
-
-  /** 매칭 방식에 따라 입력창 안내를 바꾼다. */
-  function refreshPatternInputGuide() {
-    const selectedMatchType = getSelectedMatchType();
-    patternInputHint.textContent = INPUT_HINT_BY_MATCH_TYPE[selectedMatchType];
-    newPatternInput.placeholder = INPUT_PLACEHOLDER_BY_MATCH_TYPE[selectedMatchType];
-    refreshRegexFeedback();
+    siteItemElement.append(siteBarElement, deleteButtonElement);
+    return siteItemElement;
   }
 
   // ── 렌더링: 미리보기 ─────────────────────────────────────────────────────
@@ -296,14 +221,14 @@
    * @param {ReturnType<typeof normalizeFilterSettings>} settings
    */
   function renderSettingsToScreen(settings) {
-    // 패턴 목록
-    filteredPatternListElement.replaceChildren(
-      ...settings.filteredPatternList.map(createPatternListItemElement),
-    );
-
-    const hasRegisteredPattern = settings.filteredPatternList.length > 0;
-    emptyPatternListMessage.hidden = hasRegisteredPattern;
     registeredPatternCountLabel.textContent = `${settings.filteredPatternList.length}개 등록`;
+
+    // 예외 사이트 목록
+    excludedSiteListElement.replaceChildren(
+      ...settings.excludedSiteList.map(createExcludedSiteItemElement),
+    );
+    emptyExcludedSiteMessage.hidden = settings.excludedSiteList.length > 0;
+    excludedSiteCountLabel.textContent = `${settings.excludedSiteList.length}개 등록`;
 
     // 필터링 모드
     const isWordFilteringMode = settings.filteringMode === FILTERING_MODE.WORD;
@@ -337,56 +262,26 @@
     renderPreviewLines(settings);
   }
 
-  // ── 이벤트: 단어 추가 / 삭제 ─────────────────────────────────────────────
+  // ── 이벤트: 패턴 추가 ────────────────────────────────────────────────────
 
-  addPatternForm.addEventListener('submit', async (submitEvent) => {
-    submitEvent.preventDefault();
+  // 폼 동작(매칭 방식 전환·안내 문구·정규식 검증·추가)은 공용 모듈이 담당한다.
+  // 결과 메시지를 어디에 띄울지만 이 화면이 정한다.
+  initializePatternForm({
+    formElement: addPatternForm,
+    onStatusMessage: showStatusMessage,
+  });
 
-    const patternToAdd = newPatternInput.value.trim();
-    const selectedMatchType = getSelectedMatchType();
-    const { didAdd, reason, errorMessage } = await addFilteredPattern(
-      patternToAdd,
-      selectedMatchType,
+  /**
+   * 패턴 편집 페이지를 연다.
+   *
+   * 창 이름을 지정하면 이미 열려 있는 탭을 다시 쓰므로, 버튼을 여러 번 눌러도 탭이 쌓이지 않는다.
+   * chrome.tabs 로 기존 탭을 찾으려면 tabs 권한이 필요해 이 방식을 골랐다.
+   */
+  openPatternEditorButton.addEventListener('click', () => {
+    window.open(
+      chrome.runtime.getURL('src/pattern-editor/pattern_editor.html'),
+      'wordFilterPatternEditor',
     );
-
-    if (didAdd) {
-      newPatternInput.value = '';
-      refreshRegexFeedback();
-      showStatusMessage(
-        `${selectedMatchType === MATCH_TYPE.REGEX ? '정규식' : '텍스트'} "${patternToAdd}" 추가됨`,
-        'done',
-      );
-    } else if (reason === 'empty') {
-      showStatusMessage('추가할 패턴을 입력하세요.', 'error');
-    } else if (reason === 'duplicated') {
-      showStatusMessage(`"${patternToAdd}" 는 이미 같은 방식으로 등록되어 있습니다.`, 'error');
-    } else if (reason === 'tooLong') {
-      showStatusMessage('패턴이 너무 깁니다. 200자 이내로 입력하세요.', 'error');
-    } else if (reason === 'invalidRegex') {
-      showStatusMessage(`정규식 오류: ${errorMessage}`, 'error');
-    } else if (reason === 'limitReached') {
-      showStatusMessage(`패턴은 최대 ${MAX_PATTERN_COUNT}개까지 등록할 수 있습니다.`, 'error');
-    }
-    newPatternInput.focus();
-  });
-
-  // 매칭 방식을 바꾸면 안내 문구·placeholder·검증 상태를 함께 갱신한다
-  [textMatchTypeRadio, regexMatchTypeRadio].forEach((matchTypeRadioInput) => {
-    matchTypeRadioInput.addEventListener('change', refreshPatternInputGuide);
-  });
-
-  // 정규식은 입력하는 동안 계속 문법을 확인해 준다
-  newPatternInput.addEventListener('input', refreshRegexFeedback);
-
-  // 목록은 다시 그려지므로 개별 버튼이 아니라 목록에 이벤트를 위임한다.
-  filteredPatternListElement.addEventListener('click', async (clickEvent) => {
-    const deleteButtonElement = clickEvent.target.closest('.word-item__delete');
-    if (!deleteButtonElement) return;
-
-    const patternToRemove = deleteButtonElement.dataset.targetPattern ?? '';
-    const matchTypeToRemove = deleteButtonElement.dataset.targetMatchType ?? MATCH_TYPE.TEXT;
-    await removeFilteredPattern(patternToRemove, matchTypeToRemove);
-    showStatusMessage(`"${patternToRemove}" 삭제됨`);
   });
 
   // ── 이벤트: 백업 및 복원 ─────────────────────────────────────────────────
@@ -436,6 +331,8 @@
   restoreFileInput.addEventListener('change', async () => {
     const [selectedFile] = restoreFileInput.files ?? [];
     if (!selectedFile) return;
+
+    // 같은 파일을 다시 골라도 change 가 발생하도록 값을 비워 둔다
     restoreFileInput.value = '';
 
     let rawFileText;
@@ -472,6 +369,36 @@
       `설정을 복원했습니다. 패턴 ${parseResult.settings.filteredPatternList.length}개.`,
       'done',
     );
+  });
+
+  // ── 이벤트: 사이트 예외 ──────────────────────────────────────────────────
+
+  addExcludedSiteForm.addEventListener('submit', async (submitEvent) => {
+    submitEvent.preventDefault();
+
+    const rawInput = newExcludedSiteInput.value.trim();
+    const { didAdd, hostName, reason } = await addExcludedSite(rawInput);
+
+    if (didAdd) {
+      newExcludedSiteInput.value = '';
+      showMessageAt(siteStatusMessage, `${hostName} 을(를) 예외로 등록했습니다.`, 'done');
+    } else if (reason === 'invalid') {
+      showMessageAt(siteStatusMessage, '주소를 읽을 수 없습니다. example.com 형식으로 입력하세요.', 'error');
+    } else if (reason === 'duplicated') {
+      showMessageAt(siteStatusMessage, `${hostName} 은(는) 이미 등록되어 있습니다.`, 'error');
+    } else if (reason === 'limitReached') {
+      showMessageAt(siteStatusMessage, `예외 사이트는 최대 ${MAX_EXCLUDED_SITE_COUNT}개까지 등록할 수 있습니다.`, 'error');
+    }
+    newExcludedSiteInput.focus();
+  });
+
+  excludedSiteListElement.addEventListener('click', async (clickEvent) => {
+    const deleteButtonElement = clickEvent.target.closest('.word-item__delete');
+    if (!deleteButtonElement) return;
+
+    const hostNameToRemove = deleteButtonElement.dataset.targetHostName ?? '';
+    await removeExcludedSite(hostNameToRemove);
+    showMessageAt(siteStatusMessage, `${hostNameToRemove} 예외를 해제했습니다.`);
   });
 
   // ── 이벤트: 필터링 모드 전환 ─────────────────────────────────────────────
@@ -553,8 +480,5 @@
   });
 
   // ── 초기 렌더 ────────────────────────────────────────────────────────────
-  // maxlength 를 HTML 에 적어 두면 상수와 어긋날 수 있으므로 상수에서 설정한다
-  newPatternInput.maxLength = MAX_PATTERN_LENGTH;
-  refreshPatternInputGuide();
   loadFilterSettings().then(renderSettingsToScreen);
 })();

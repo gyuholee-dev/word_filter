@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>필터링 패턴 편집 · Word Filter</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
+    <link rel="stylesheet" href="pattern_editor.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="editor-head">
+        <h1 class="editor-head__title">필터링 패턴 편집</h1>
+        <button class="button" type="button" id="openOptionsButton">전체 설정 열기</button>
+      </header>
+
+      <section class="panel" aria-labelledby="patternSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="patternSectionTitle">필터링 패턴</h2>
+          <p class="panel__count" id="registeredPatternCountLabel">0개 등록</p>
+        </div>
+
+        <form class="pattern-form" id="addPatternForm" autocomplete="off">
+          <div class="pattern-form__toolbar">
+            <div class="type-select" role="radiogroup" aria-label="매칭 방식">
+              <label class="type-option">
+                <input
+                  type="radio"
+                  name="matchTypeRadioGroup"
+                  id="textMatchTypeRadio"
+                  value="text"
+                  checked
+                />
+                <span class="type-option__label">텍스트</span>
+              </label>
+              <label class="type-option">
+                <input type="radio" name="matchTypeRadioGroup" id="regexMatchTypeRadio" value="regex" />
+                <span class="type-option__label">정규식</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pattern-form__row">
+            <input
+              class="pattern-form__input"
+              id="newPatternInput"
+              type="text"
+              placeholder="예: 스포일러"
+              spellcheck="false"
+            />
+            <button class="button button--primary pattern-form__add-button" type="submit">추가</button>
+          </div>
+
+          <p class="pattern-form__hint" id="patternInputHint"></p>
+          <p class="regex-feedback" id="regexFeedbackMessage" role="status" aria-live="polite" hidden></p>
+        </form>
+
+        <p class="status" id="statusMessage" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="patternListTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="patternListTitle">등록된 패턴</h2>
+          <p class="panel__count" id="visiblePatternCountLabel">0개</p>
+        </div>
+
+        <div class="pattern-search">
+          <input
+            class="pattern-search__input"
+            id="patternSearchInput"
+            type="search"
+            placeholder="패턴 검색"
+            spellcheck="false"
+            aria-label="등록된 패턴 검색"
+          />
+          <button class="button" type="button" id="clearPatternSearchButton" hidden>지우기</button>
+        </div>
+
+        <ul class="word-list" id="filteredPatternList"></ul>
+        <p class="word-list__empty" id="emptyPatternListMessage">
+          등록된 패턴이 없습니다. 위에서 추가하세요.
+        </p>
+        <p class="word-list__empty" id="noSearchResultMessage" hidden>
+          검색 결과가 없습니다.
+        </p>
+      </section>
+    </div>
+
+    <script src="../shared/filter_settings_storage.js"></script>
+    <script src="../shared/pattern_form.js"></script>
+    <script src="pattern_editor.js"></script>
+  </body>
+</html>

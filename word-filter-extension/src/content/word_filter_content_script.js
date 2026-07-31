@@ -17,6 +17,8 @@
  *   4) chrome.storage.onChanged → 옵션 화면에서 패턴/모드/컬러를 바꾸면
  *      전체 복원 후 재적용한다. 새로고침이 필요 없다.
  *   5) 처리한 개수는 service worker 로 보내 확장 아이콘 배지에 표시한다.
+ *
+ * 예외 사이트로 등록된 도메인에서는 스캔도 DOM 감시도 하지 않는다.
  */
 (() => {
   // 확장 리로드 등으로 중복 주입되는 경우를 방지
@@ -29,6 +31,7 @@
     FILTER_SETTINGS_STORAGE_KEY,
     FILTERING_MODE,
     DEFAULT_FILTER_SETTINGS,
+    findMatchingExcludedSite,
   } = globalThis.wordFilterSettingsStorage;
 
   const {
@@ -119,6 +122,13 @@
   let currentFilterSettings = { ...DEFAULT_FILTER_SETTINGS };
 
   /**
+   * 이 페이지가 걸린 예외 사이트 항목. 없으면 null.
+   * 설정이 바뀔 때마다 다시 계산해, 목록에 도메인을 추가하면 열려 있던 탭에서도 즉시 풀린다.
+   * @type {string | null}
+   */
+  let matchedExcludedSite = null;
+
+  /**
    * 컴파일된 패턴 목록. 설정이 바뀔 때 한 번만 만들어 재사용한다.
    * 정규식을 텍스트 노드마다 새로 컴파일하면 성능이 무너지기 때문이다.
    */
@@ -141,6 +151,36 @@
   const pendingScanRootSet = new Set();
 
   // ───────────────────────── 단어 매칭 ─────────────────────────
+
+  /**
+   * 예외 판정에 쓸 호스트 이름을 정한다.
+   *
+   * iframe 안에서는 자기 주소가 아니라 **사용자가 보고 있는 최상위 페이지**의 주소를 기준으로
+   * 삼아야 "이 사이트는 끄기"라는 기대와 맞는다. 다른 출처의 iframe 은 최상위 주소를 읽을 수
+   * 없으므로 그때는 자기 호스트로 되돌아간다.
+   *
+   * @returns {string}
+   */
+  function resolveCurrentHostName() {
+    try {
+      return window.top.location.hostname;
+    } catch {
+      return window.location.hostname;
+    }
+  }
+
+  /** 설정이 바뀔 때마다 예외 사이트 여부를 다시 계산한다. */
+  function refreshExcludedSiteState() {
+    matchedExcludedSite = findMatchingExcludedSite(
+      resolveCurrentHostName(),
+      currentFilterSettings.excludedSiteList,
+    );
+  }
+
+  /** 이 페이지에 필터링을 적용해야 하는지 */
+  function shouldFilterCurrentPage() {
+    return currentFilterSettings.isFilteringEnabled && matchedExcludedSite === null;
+  }
 
   /** 설정이 바뀔 때마다 패턴 목록을 다시 컴파일한다. */
   function rebuildCompiledPatternList() {
@@ -336,7 +376,7 @@
    * @returns {number} 이번 호출에서 새로 처리한 개수
    */
   function applyFilterToSubtree(scanRootNode) {
-    if (!currentFilterSettings.isFilteringEnabled) return 0;
+    if (!shouldFilterCurrentPage()) return 0;
     if (compiledPatternList.length === 0) return 0;
     if (!scanRootNode || !scanRootNode.isConnected) return 0;
 
@@ -357,7 +397,7 @@
     restoreAllFiltersWithin(document);
     filteredTargetCount = 0;
 
-    if (currentFilterSettings.isFilteringEnabled) {
+    if (shouldFilterCurrentPage()) {
       applyFilterToSubtree(document.body ?? document.documentElement);
     }
     reportFilteredTargetCountToServiceWorker();
@@ -399,7 +439,7 @@
     if (domChangeObserver) return;
 
     domChangeObserver = new MutationObserver((mutationRecordList) => {
-      if (!currentFilterSettings.isFilteringEnabled) return;
+      if (!shouldFilterCurrentPage()) return;
 
       mutationRecordList.forEach((mutationRecord) => {
         if (mutationRecord.type === 'characterData') {
@@ -458,6 +498,8 @@
         filteringMode: currentFilterSettings.filteringMode,
         isFilteringEnabled: currentFilterSettings.isFilteringEnabled,
         registeredPatternCount: currentFilterSettings.filteredPatternList.length,
+        currentHostName: resolveCurrentHostName(),
+        matchedExcludedSite,
       });
       return false;
     }
@@ -474,6 +516,7 @@
     if (areaName !== 'sync' || !changeMap[FILTER_SETTINGS_STORAGE_KEY]) return;
     currentFilterSettings = normalizeFilterSettings(changeMap[FILTER_SETTINGS_STORAGE_KEY].newValue);
     rebuildCompiledPatternList();
+    refreshExcludedSiteState();
     applyFilterToEntireDocument();
   });
 
@@ -482,6 +525,7 @@
   async function initializeWordFilter() {
     currentFilterSettings = await loadFilterSettings();
     rebuildCompiledPatternList();
+    refreshExcludedSiteState();
     applyFilterToEntireDocument();
     startObservingDomChanges();
   }

@@ -1,0 +1,67 @@
+/* 패턴 편집 페이지 고유 스타일. 토큰·패널·목록은 ../shared/theme.css 에 있다. */
+
+body {
+  margin: 0;
+  padding: 40px 24px 64px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.editor-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.editor-head__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+/* 매칭 방식 탭 줄 (설정 화면과 같은 배치) */
+.pattern-form__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+/* ── 패턴 검색 ──────────────────────────────────────────────────────────── */
+
+.pattern-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.pattern-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper-input);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 9px 12px;
+}
+
+.pattern-search__input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.pattern-search .button[hidden] {
+  display: none;
+}

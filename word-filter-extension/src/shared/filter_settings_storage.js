@@ -56,6 +56,9 @@
    */
   const MAX_PATTERN_COUNT = 100;
 
+  /** 예외로 등록할 수 있는 사이트 최대 개수 (저장 용량 한도를 넘지 않도록) */
+  const MAX_EXCLUDED_SITE_COUNT = 100;
+
   /**
    * 패턴 최대 길이.
    * 정규식은 백트래킹 폭발(ReDoS)로 페이지를 멈추게 할 수 있어 입력 자체를 제한한다.
@@ -111,6 +114,8 @@
     filterColor: DEFAULT_FILTER_COLOR,
     /** true면 대소문자를 구분해서 매칭 */
     shouldMatchCaseSensitively: false,
+    /** 필터링을 하지 않을 사이트 호스트 목록 (예: ['example.com']) */
+    excludedSiteList: [],
   });
 
   // ───────────────────────── 컬러 유틸 ─────────────────────────
@@ -209,6 +214,91 @@
       green: parseInt(hexDigits.slice(2, 4), 16),
       blue: parseInt(hexDigits.slice(4, 6), 16),
     };
+  }
+
+  // ───────────────────────── 사이트 예외 ─────────────────────────
+
+  /**
+   * 사용자가 입력한 값에서 호스트 이름만 뽑아낸다.
+   *
+   * 주소 전체를 붙여 넣어도 되고 도메인만 적어도 되게 한다.
+   *   'https://gall.dcinside.com/board/lists/?id=x' → 'gall.dcinside.com'
+   *   'dcinside.com'                                → 'dcinside.com'
+   *   'www.example.com'                             → 'example.com'
+   *
+   * 앞의 www. 를 떼는 이유: 사용자가 주소창에서 복사하면 www 가 붙는 경우가 많은데,
+   * 그대로 저장하면 www 없는 주소가 예외에서 빠져 같은 사이트가 갈라진다.
+   *
+   * @param {string} rawInput
+   * @returns {string | null} 호스트 이름. 주소로 해석할 수 없으면 null
+   */
+  function extractHostNameFromInput(rawInput) {
+    const trimmedInput = String(rawInput ?? '').trim();
+    if (trimmedInput.length === 0) return null;
+
+    // 스킴이 없으면 붙여서 URL 로 해석한다. URL 파서에 맡겨야 포트·경로·인증정보를 정확히 걷어낸다.
+    const inputWithScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmedInput)
+      ? trimmedInput
+      : `https://${trimmedInput}`;
+
+    let hostName;
+    try {
+      hostName = new URL(inputWithScheme).hostname.toLowerCase();
+    } catch {
+      return null;
+    }
+    if (hostName.length === 0) return null;
+
+    // 호스트로 볼 수 없는 값(공백, 잘못된 문자 등)을 걸러 낸다
+    if (!/^[a-z0-9.-]+$/.test(hostName)) return null;
+
+    return hostName.replace(/^www\./, '');
+  }
+
+  /**
+   * 예외 목록을 항상 안전한 형태로 만든다. 해석할 수 없는 값은 버리고 중복은 합친다.
+   * @param {unknown} rawSiteList
+   * @returns {string[]}
+   */
+  function normalizeExcludedSiteList(rawSiteList) {
+    if (!Array.isArray(rawSiteList)) return [];
+
+    const seenHostNameSet = new Set();
+    const normalizedSiteList = [];
+    rawSiteList.forEach((rawSite) => {
+      const hostName = extractHostNameFromInput(rawSite);
+      if (!hostName || seenHostNameSet.has(hostName)) return;
+      if (normalizedSiteList.length >= MAX_EXCLUDED_SITE_COUNT) return;
+      seenHostNameSet.add(hostName);
+      normalizedSiteList.push(hostName);
+    });
+    return normalizedSiteList;
+  }
+
+  /**
+   * 현재 호스트가 예외 목록에 걸리는지 판단한다.
+   *
+   * 등록한 도메인과 그 하위 도메인을 모두 예외로 본다. 'dcinside.com' 하나만 등록해도
+   * 'gall.dcinside.com' 이 함께 제외되도록 하기 위한 것이다.
+   *
+   * 단순히 endsWith 로 비교하면 'evil-dcinside.com' 처럼 뒤만 같은 다른 사이트가 걸리므로
+   * 반드시 점 경계에서 끊어 비교한다.
+   *
+   * @param {string} currentHostName
+   * @param {string[]} excludedSiteList
+   * @returns {string | null} 걸린 등록 항목. 없으면 null
+   */
+  function findMatchingExcludedSite(currentHostName, excludedSiteList) {
+    if (!currentHostName || !Array.isArray(excludedSiteList)) return null;
+
+    const comparableHostName = currentHostName.toLowerCase().replace(/^www\./, '');
+    return (
+      excludedSiteList.find(
+        (excludedSite) =>
+          comparableHostName === excludedSite ||
+          comparableHostName.endsWith(`.${excludedSite}`),
+      ) ?? null
+    );
   }
 
   // ───────────────────────── 패턴 목록 정규화 ─────────────────────────
@@ -312,6 +402,7 @@
         typeof storedSettings.shouldMatchCaseSensitively === 'boolean'
           ? storedSettings.shouldMatchCaseSensitively
           : DEFAULT_FILTER_SETTINGS.shouldMatchCaseSensitively,
+      excludedSiteList: normalizeExcludedSiteList(storedSettings.excludedSiteList),
     };
   }
 
@@ -430,6 +521,43 @@
     });
   }
 
+  /**
+   * 사이트를 예외 목록에 추가한다.
+   * @param {string} rawInput 주소 또는 도메인
+   * @returns {Promise<{didAdd: boolean, hostName: string | null, reason?: string}>}
+   */
+  async function addExcludedSite(rawInput) {
+    const hostName = extractHostNameFromInput(rawInput);
+    const currentSettings = await loadFilterSettings();
+
+    if (!hostName) return { didAdd: false, hostName: null, reason: 'invalid' };
+    if (currentSettings.excludedSiteList.includes(hostName)) {
+      return { didAdd: false, hostName, reason: 'duplicated' };
+    }
+    if (currentSettings.excludedSiteList.length >= MAX_EXCLUDED_SITE_COUNT) {
+      return { didAdd: false, hostName, reason: 'limitReached' };
+    }
+
+    await updateFilterSettings({
+      excludedSiteList: [...currentSettings.excludedSiteList, hostName],
+    });
+    return { didAdd: true, hostName };
+  }
+
+  /**
+   * 사이트를 예외 목록에서 제거한다.
+   * @param {string} hostNameToRemove
+   * @returns {Promise<typeof DEFAULT_FILTER_SETTINGS>}
+   */
+  async function removeExcludedSite(hostNameToRemove) {
+    const currentSettings = await loadFilterSettings();
+    return updateFilterSettings({
+      excludedSiteList: currentSettings.excludedSiteList.filter(
+        (excludedSite) => excludedSite !== hostNameToRemove,
+      ),
+    });
+  }
+
   // ───────────────────── 백업 / 복원 ─────────────────────
 
   /**
@@ -523,6 +651,7 @@
     MATCH_TYPE,
     MAX_PATTERN_LENGTH,
     MAX_PATTERN_COUNT,
+    MAX_EXCLUDED_SITE_COUNT,
     DEFAULT_FILTER_COLOR,
     DEFAULT_FILTER_SETTINGS,
     validateRegexPattern,
@@ -536,6 +665,10 @@
     updateFilterSettings,
     addFilteredPattern,
     removeFilteredPattern,
+    extractHostNameFromInput,
+    findMatchingExcludedSite,
+    addExcludedSite,
+    removeExcludedSite,
     serializeFilterSettingsToJson,
     parseFilterSettingsFromJson,
     restoreFilterSettings,

@@ -25,6 +25,54 @@
         </p>
       </header>
 
+      <section class="panel" aria-labelledby="patternSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="patternSectionTitle">필터링 패턴</h2>
+          <p class="panel__count" id="registeredPatternCountLabel">0개 등록</p>
+        </div>
+
+        <form class="pattern-form" id="addPatternForm" autocomplete="off">
+          <div class="pattern-form__toolbar">
+            <div class="type-select" role="radiogroup" aria-label="매칭 방식">
+              <label class="type-option">
+                <input
+                  type="radio"
+                  name="matchTypeRadioGroup"
+                  id="textMatchTypeRadio"
+                  value="text"
+                  checked
+                />
+                <span class="type-option__label">텍스트</span>
+              </label>
+              <label class="type-option">
+                <input type="radio" name="matchTypeRadioGroup" id="regexMatchTypeRadio" value="regex" />
+                <span class="type-option__label">정규식</span>
+              </label>
+            </div>
+
+            <button class="button" type="button" id="openPatternEditorButton">패턴 편집</button>
+          </div>
+
+          <div class="pattern-form__row">
+            <input
+              class="pattern-form__input"
+              id="newPatternInput"
+              type="text"
+              placeholder="예: 스포일러"
+              spellcheck="false"
+            />
+            <button class="button button--primary pattern-form__add-button" type="submit">추가</button>
+          </div>
+
+          <p class="pattern-form__hint" id="patternInputHint">
+            부분 일치로 동작합니다. "결말"을 등록하면 "결말 주의"가 포함된 문단도 처리됩니다.
+          </p>
+          <p class="regex-feedback" id="regexFeedbackMessage" role="status" aria-live="polite" hidden></p>
+        </form>
+
+        <p class="status" id="statusMessage" role="status" aria-live="polite"></p>
+      </section>
+
       <section class="panel panel--preview" aria-labelledby="previewSectionTitle">
         <div class="panel__head">
           <h2 class="panel__title" id="previewSectionTitle">미리보기</h2>
@@ -171,52 +219,35 @@
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="patternSectionTitle">
+      <section class="panel" aria-labelledby="siteSectionTitle">
         <div class="panel__head">
-          <h2 class="panel__title" id="patternSectionTitle">필터링 패턴</h2>
-          <p class="panel__count" id="registeredPatternCountLabel">0개 등록</p>
+          <h2 class="panel__title" id="siteSectionTitle">사이트 예외</h2>
+          <p class="panel__count" id="excludedSiteCountLabel">0개 등록</p>
         </div>
 
-        <form class="pattern-form" id="addPatternForm" autocomplete="off">
-          <div class="type-select" role="radiogroup" aria-label="매칭 방식">
-            <label class="type-option">
-              <input
-                type="radio"
-                name="matchTypeRadioGroup"
-                id="textMatchTypeRadio"
-                value="text"
-                checked
-              />
-              <span class="type-option__label">텍스트</span>
-            </label>
-            <label class="type-option">
-              <input type="radio" name="matchTypeRadioGroup" id="regexMatchTypeRadio" value="regex" />
-              <span class="type-option__label">정규식</span>
-            </label>
-          </div>
-
+        <form class="pattern-form" id="addExcludedSiteForm" autocomplete="off">
           <div class="pattern-form__row">
             <input
               class="pattern-form__input"
-              id="newPatternInput"
+              id="newExcludedSiteInput"
               type="text"
-              placeholder="예: 스포일러"
+              placeholder="예: example.com 또는 https://example.com/page"
               spellcheck="false"
             />
-            <button class="button button--primary" type="submit" id="addPatternButton">추가</button>
+            <button class="button button--primary" type="submit">예외 추가</button>
           </div>
-
-          <p class="pattern-form__hint" id="patternInputHint">
-            부분 일치로 동작합니다. "결말"을 등록하면 "결말 주의"가 포함된 문단도 처리됩니다.
+          <p class="pattern-form__hint">
+            등록한 도메인에서는 필터링이 동작하지 않습니다. 주소 전체를 붙여 넣어도 도메인만
+            저장되며, <strong>하위 도메인도 함께 제외</strong>됩니다.
+            (<code>example.com</code> → <code>blog.example.com</code> 도 제외)
           </p>
-          <p class="regex-feedback" id="regexFeedbackMessage" role="status" aria-live="polite" hidden></p>
         </form>
 
-        <p class="status" id="statusMessage" role="status" aria-live="polite"></p>
+        <p class="status" id="siteStatusMessage" role="status" aria-live="polite"></p>
 
-        <ul class="word-list" id="filteredPatternList"></ul>
-        <p class="word-list__empty" id="emptyPatternListMessage">
-          등록된 패턴이 없습니다. 위에 추가하면 열려 있는 탭에 바로 적용됩니다.
+        <ul class="word-list" id="excludedSiteList"></ul>
+        <p class="word-list__empty" id="emptyExcludedSiteMessage">
+          등록된 예외 사이트가 없습니다.
         </p>
       </section>
 
@@ -250,6 +281,7 @@
 
     <script src="../shared/filter_settings_storage.js"></script>
     <script src="../shared/filter_apply_helper.js"></script>
+    <script src="../shared/pattern_form.js"></script>
     <script src="options.js"></script>
   </body>
 </html>
