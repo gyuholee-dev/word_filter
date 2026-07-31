@@ -1,0 +1,56 @@
+/* ===========================================================================
+   word_filter_styles.css  —  블록 모드 전용 스타일시트
+   ---------------------------------------------------------------------------
+   모든 페이지에 주입되지만, 우리가 붙인 마커 속성이 있는 엘리먼트에만 반응하므로
+   평소에는 아무것도 매칭되지 않는다.
+
+   [적용 방식을 소유권으로 나눈 이유]
+   - 단어 모드의 span 은 **우리가 만든 엘리먼트**다. 인라인 스타일 + !important 가
+     CSS 우선순위상 가장 강하고 복원 시 통째로 버리면 되므로 전부 인라인으로 넣는다.
+     (→ 이 파일에 단어 모드 규칙이 없는 이유)
+   - 블록 모드의 대상은 **페이지가 소유한 엘리먼트**다. 자손 엘리먼트가 자기 색을
+     갖고 있으면(예: <span style="color:red">) 부모에만 색을 넣어도 그 자손은 그대로
+     보이므로 `[marker] *` 자손 셀렉터가 반드시 필요하다. 이건 인라인으로 표현할 수
+     없어서 스타일시트로 처리한다.
+
+   [CSS 변수를 쓰는 이유]
+   content script 는 대상 엘리먼트에 --word-filter-color 하나만 심는다.
+   CSS 변수는 상속되므로 자손 셀렉터에서도 같은 값이 그대로 쓰인다.
+   색이 바뀌면 변수 하나만 갈아끼우면 되고, DOM 오염도 최소화된다.
+
+   [셀렉터를 세 번 반복한 이유]
+   [data-word-filter-block] 한 번은 명시도 (0,1,0) 이라 페이지의
+   `.card span { color: red !important }` (0,1,1) 에 진다. 속성 셀렉터를 세 번
+   반복하면 (0,3,0) 이 되어 클래스 조합 대부분을 이긴다. 부작용 없이 명시도만 올리는
+   관용적인 방법이다.
+
+   [Opacity 의미]
+   글자색과 배경색을 같은 색으로 맞추므로 원문 텍스트는 opacity 와 무관하게 항상 가려진다.
+   opacity 는 "덮은 색을 얼마나 보여줄지"만 결정한다.
+     0 → 완전히 투명 (대상이 아예 보이지 않음 = 기본값)
+     1 → 색이 꽉 찬 블록
+   =========================================================================== */
+
+[data-word-filter-block][data-word-filter-block][data-word-filter-block],
+[data-word-filter-block][data-word-filter-block][data-word-filter-block] * {
+  background-color: var(--word-filter-color, rgb(0, 0, 0)) !important;
+  background-image: none !important;
+  color: var(--word-filter-color, rgb(0, 0, 0)) !important;
+  /* 그라데이션 텍스트(-webkit-text-fill-color: transparent)로 글자가 드러나는 것을 막는다 */
+  -webkit-text-fill-color: var(--word-filter-color, rgb(0, 0, 0)) !important;
+  /* 링크 밑줄이 다른 색으로 남는 것을 막는다 */
+  text-decoration-color: var(--word-filter-color, rgb(0, 0, 0)) !important;
+  /* 그림자로 글자 윤곽이 비치는 것을 막는다 */
+  text-shadow: none !important;
+  border-color: var(--word-filter-color, rgb(0, 0, 0)) !important;
+}
+
+/* 이미지·영상은 색으로 덮을 수 없으므로 따로 감춘다.
+   visibility 를 쓰면 자리는 유지되어 레이아웃이 흔들리지 않는다. */
+[data-word-filter-block] img,
+[data-word-filter-block] svg,
+[data-word-filter-block] video,
+[data-word-filter-block] canvas,
+[data-word-filter-block] iframe {
+  visibility: hidden !important;
+}

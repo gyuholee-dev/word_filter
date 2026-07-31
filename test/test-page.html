@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Word Filter 테스트 페이지</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px 20px 80px;
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+        background: #fbfbfc;
+        color: #14171c;
+        line-height: 1.6;
+      }
+      .wrap {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: #5b616b;
+        margin: 0 0 28px;
+        font-size: 14px;
+      }
+      section {
+        border: 1px solid #dfe2e7;
+        background: #fff;
+        padding: 18px 20px 22px;
+        margin-bottom: 18px;
+      }
+      h2 {
+        font-size: 15px;
+        margin: 0 0 4px;
+      }
+      .case-note {
+        font-size: 12px;
+        color: #6b7280;
+        margin: 0 0 14px;
+      }
+      .card {
+        border: 1px solid #e6e8ec;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td,
+      th {
+        border: 1px solid #e6e8ec;
+        padding: 8px 10px;
+        text-align: left;
+      }
+      button {
+        font: inherit;
+        font-size: 13px;
+        padding: 7px 12px;
+        border: 1px solid #14171c;
+        background: #14171c;
+        color: #fff;
+        cursor: pointer;
+        margin-right: 6px;
+      }
+      #dynamicArea .card {
+        border-color: #c8cdd6;
+      }
+      .gradient-text {
+        background: linear-gradient(90deg, #6d28d9, #db2777);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+      }
+      code {
+        background: #eef0f3;
+        padding: 1px 5px;
+        font-family: ui-monospace, Consolas, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Word Filter 테스트 페이지</h1>
+      <p class="sub">
+        확장 설정에서 <code>스포일러</code>, <code>결말</code>, <code>Spoiler</code> 를 등록한 뒤 이
+        페이지를 확인하세요. 섹션 1~8 은 <strong>블록 모드</strong>, 섹션 9~10 은 <strong>단어 모드</strong> 및
+        <strong>필터링 컬러</strong>, 섹션 11 은 <strong>정규표현식</strong> 검증용입니다.
+      </p>
+
+      <section>
+        <h2>1. 문단 (block 엘리먼트)</h2>
+        <p class="case-note">단어가 있는 &lt;p&gt; 만 사라지고 나머지 문단은 그대로 남아야 합니다.</p>
+        <p>이 문단에는 걸릴 단어가 없습니다. 그대로 보여야 정상입니다.</p>
+        <p>이 문단에는 스포일러 라는 단어가 들어 있어 숨겨져야 합니다.</p>
+        <p>이 문단도 정상적으로 보여야 합니다.</p>
+      </section>
+
+      <section>
+        <h2>2. inline 엘리먼트 (span)</h2>
+        <p class="case-note">
+          &lt;span&gt; 은 inline 이므로 상위 block 인 &lt;p&gt; 까지 올라가 숨겨져야 합니다.
+        </p>
+        <p>앞부분 텍스트 <span>결말</span> 뒷부분 텍스트</p>
+        <p>이 줄은 남아 있어야 합니다.</p>
+      </section>
+
+      <section>
+        <h2>3. 목록 (li 단위로 숨김)</h2>
+        <p class="case-note">단어가 포함된 &lt;li&gt; 하나만 사라져야 합니다.</p>
+        <ul>
+          <li>첫 번째 댓글 — 재미있게 봤습니다</li>
+          <li>두 번째 댓글 — 결말 진짜 충격적</li>
+          <li>세 번째 댓글 — 다음 편 기대됩니다</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. 카드 / 중첩 구조</h2>
+        <p class="case-note">
+          카드 안의 텍스트가 걸리면 카드(div) 단위로 사라지고, 섹션 전체는 남아야 합니다.
+        </p>
+        <div class="card"><strong>공지</strong><span> 서버 점검 안내</span></div>
+        <div class="card"><strong>주의</strong><span> 스포일러 포함된 글입니다</span></div>
+        <div class="card"><strong>공지</strong><span> 이벤트 당첨자 발표</span></div>
+      </section>
+
+      <section>
+        <h2>5. 표 (td 단위로 숨김)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>제목</th>
+              <th>작성자</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>일반 게시글</td>
+              <td>홍길동</td>
+            </tr>
+            <tr>
+              <td>결말 정리글</td>
+              <td>임꺽정</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>6. 대소문자 구분 테스트</h2>
+        <p class="case-note">
+          "대소문자 구분"을 끈 상태에서 <code>spoiler</code> 를 등록하면 아래 두 줄 모두 사라집니다.
+          켜면 정확히 일치하는 줄만 사라집니다.
+        </p>
+        <p>lowercase: this line contains spoiler text</p>
+        <p>Uppercase: this line contains Spoiler text</p>
+      </section>
+
+      <section>
+        <h2>7. 동적으로 추가되는 DOM (MutationObserver 검증)</h2>
+        <p class="case-note">
+          버튼을 누르면 나중에 추가되는 요소입니다. 새로고침 없이 즉시 숨겨져야 합니다.
+        </p>
+        <button type="button" id="appendCleanCardButton">일반 카드 추가</button>
+        <button type="button" id="appendFilteredCardButton">"스포일러" 카드 추가</button>
+        <button type="button" id="mutateTextButton">아래 문장 텍스트를 "결말"로 변경</button>
+        <div id="dynamicArea" style="margin-top: 14px">
+          <div class="card" id="mutableCard">이 문장은 버튼을 누르면 내용이 바뀝니다.</div>
+        </div>
+      </section>
+
+      <section>
+        <h2>8. 3초 후 자동 추가 (지연 로딩 시나리오)</h2>
+        <p class="case-note">페이지 로드 3초 뒤에 자동으로 카드가 하나 추가됩니다.</p>
+        <div id="lazyArea"></div>
+      </section>
+
+      <section>
+        <h2>9. 단어 모드 검증</h2>
+        <p class="case-note">
+          설정에서 <strong>필터링 모드 → 단어</strong> 를 선택하고
+          <strong>필터링 컬러 Opacity 를 1</strong> 로 올린 뒤 확인하세요.
+          단어 위에만 색이 덮이고 나머지 문장은 그대로 읽혀야 합니다.
+        </p>
+
+        <div class="card">문장 중간에 결말 이 있어도 앞뒤 문맥은 읽을 수 있어야 합니다.</div>
+
+        <div class="card">한 줄에 결말 이 두 번 나오면 결말 둘 다 칠해져야 합니다.</div>
+
+        <div class="card">
+          링크 안의 단어도 칠해져야 합니다 →
+          <a href="#" onclick="return false">결말 정리 게시글 보기</a>
+        </div>
+
+        <div class="card">
+          페이지가 색을 <code>!important</code> 로 강제한 경우 →
+          <span style="color: #d62828 !important">결말 언급</span> 도 칠해져야 합니다.
+        </div>
+
+        <div class="card gradient-text">
+          그라데이션 텍스트(text-fill-color: transparent)에서도 결말 이 드러나지 않아야 합니다.
+        </div>
+
+        <div class="card" style="max-width: 160px">
+          좁은 폭에서 줄바꿈에 걸리는 경우: 아주긴단어결말테스트문자열 도 끊기지 않고 칠해져야 합니다.
+        </div>
+
+        <div class="card">
+          <input type="text" value="입력 필드의 결말 은 대상이 아닙니다" size="38" />
+          <div contenteditable="true" style="border: 1px dashed #aaa; padding: 6px; margin-top: 6px">
+            편집 가능 영역입니다. 여기의 결말 은 편집 방해를 막기 위해 제외됩니다.
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>10. 필터링 컬러 검증 (RGB / Opacity)</h2>
+        <p class="case-note">
+          <strong>필터링 모드 → 블록</strong> 으로 두고 Opacity 를 0 → 0.5 → 1 로 올려 보세요.
+          0 이면 카드가 완전히 사라지고, 1 이면 지정한 RGB 색으로 꽉 찬 블록이 되어야 합니다.
+          어느 값에서도 원문 글자는 읽히지 않아야 합니다.
+        </p>
+
+        <div class="card">
+          자식이 자기 색을 가진 경우 →
+          <span style="color: #16a34a !important">결말</span>
+          <span style="color: #ea580c">언급 있음</span>
+          (Opacity 1 에서 초록·주황 글자까지 모두 덮여야 합니다)
+        </div>
+
+        <div class="card gradient-text">
+          그라데이션 텍스트에 결말 이 있어도 글자가 드러나지 않아야 합니다.
+        </div>
+
+        <div class="card">
+          <img
+            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='44'><rect width='72' height='44' fill='%233b82f6'/></svg>"
+            alt="파란 사각형"
+            style="vertical-align: middle; margin-right: 8px"
+          />
+          이미지가 함께 있는 카드의 결말 언급 (Opacity 1 에서 이미지도 감춰져야 합니다)
+        </div>
+
+        <div class="card">
+          <a href="#" onclick="return false" style="color: #2563eb">
+            링크 색과 밑줄도 결말 처리 시 함께 덮여야 합니다
+          </a>
+        </div>
+
+        <div class="card" style="opacity: 0.85">
+          페이지가 원래 <code>opacity: 0.85</code> 를 갖고 있던 카드의 결말 언급.
+          필터를 끄면 0.85 가 그대로 복원되어야 합니다.
+        </div>
+      </section>
+
+      <section>
+        <h2>11. 정규표현식 검증</h2>
+        <p class="case-note">
+          설정에서 <strong>매칭 방식 → 정규식</strong> 을 고르고 아래 4개를 등록하세요.
+          <code>\d+화</code> · <code>^\[광고\]</code> · <code>시즌\s?\d+</code> ·
+          <code>SPOILER</code><br />
+          확인이 쉬우려면 <strong>단어 모드 + Opacity 1</strong> 로 두세요.
+        </p>
+
+        <div class="card">12화 예고편이 공개되었습니다 (숫자+화 매칭)</div>
+        <div class="card">3화 그리고 25화 동시 공개 (한 줄에 두 번 매칭)</div>
+        <div class="card">화요일 연재입니다 (숫자가 없어 매칭 안 됨)</div>
+
+        <div class="card">[광고] 지금 구매하세요 (^ 앵커 일치)</div>
+        <div class="card">본문 중간의 [광고] 표기 (^ 앵커 불일치 → 처리 안 됨)</div>
+
+        <div class="card">시즌2 방영 시작 (공백 없음)</div>
+        <div class="card">시즌 3 방영 시작 (공백 있음 — \s? 로 둘 다 매칭)</div>
+
+        <div class="card">
+          대소문자: SPOILER / Spoiler / spoiler — "대소문자 구분"을 끄면 i 플래그가 붙어 셋 다,
+          켜면 대문자만 매칭됩니다.
+        </div>
+
+        <div class="card">
+          메타문자 포함 텍스트: <strong>C++</strong> 와 <strong>(주)회사</strong> 를
+          <em>텍스트</em> 방식으로 등록하면 그대로 매칭되고, <em>정규식</em> 방식으로 등록하면
+          문법 오류로 거부됩니다. 항목별 타입이 필요한 이유입니다.
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const dynamicArea = document.getElementById('dynamicArea');
+      let appendedCardCount = 0;
+
+      function appendCard(cardText) {
+        appendedCardCount += 1;
+        const cardElement = document.createElement('div');
+        cardElement.className = 'card';
+        cardElement.textContent = `동적 카드 #${appendedCardCount} — ${cardText}`;
+        dynamicArea.appendChild(cardElement);
+      }
+
+      document
+        .getElementById('appendCleanCardButton')
+        .addEventListener('click', () => appendCard('평범한 내용입니다'));
+
+      document
+        .getElementById('appendFilteredCardButton')
+        .addEventListener('click', () => appendCard('스포일러 가 포함된 내용입니다'));
+
+      document.getElementById('mutateTextButton').addEventListener('click', () => {
+        document.getElementById('mutableCard').textContent =
+          '방금 텍스트가 바뀌었습니다: 결말 언급 포함';
+      });
+
+      setTimeout(() => {
+        const lazyCardElement = document.createElement('div');
+        lazyCardElement.className = 'card';
+        lazyCardElement.textContent = '3초 뒤 로딩된 카드 — 스포일러 주의';
+        document.getElementById('lazyArea').appendChild(lazyCardElement);
+      }, 3000);
+    </script>
+  </body>
+</html>

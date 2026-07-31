@@ -1,0 +1,194 @@
+/* 팝업 고유 스타일. 공통 토큰과 컴포넌트는 ../shared/theme.css 에 있다. */
+
+/* 팝업 고유 스타일. 공통 토큰과 컴포넌트는 ../shared/theme.css 에 있다. */
+
+:root {
+  /* 팝업은 306px 폭이므로 공통 컴포넌트를 한 단계 작게 쓴다. */
+  --button-font-size: 12px;
+  --button-padding: 7px 12px;
+  --switch-track-width: 42px;
+  --switch-track-height: 22px;
+  --switch-knob-size: 16px;
+}
+
+body {
+  width: 306px;
+  margin: 0;
+  padding: 14px 16px 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.popup-head {
+  margin-bottom: 12px;
+}
+
+.popup-head__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.popup-head__mark-bar {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  padding: 1px 6px 2px;
+}
+
+/* 팝업의 주인공: 이 페이지에서 몇 개를 숨겼는지 */
+
+.tally {
+  border: 1px solid var(--ink);
+  background: var(--paper-raised);
+  padding: 12px 14px 14px;
+  margin: 0 0 12px;
+}
+
+.tally__number {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 40px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.tally__caption {
+  margin: 6px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  color: var(--ink-soft);
+}
+
+.popup-row {
+  padding: 10px 0;
+  border-top: 1px solid var(--paper-edge);
+  border-bottom: 1px solid var(--paper-edge);
+  margin-bottom: 12px;
+}
+
+/* 빠른 추가 */
+
+.quick-add {
+  margin: 0 0 10px;
+}
+
+.quick-add__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.quick-add__row {
+  display: flex;
+  gap: 6px;
+}
+
+.quick-add__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper-input);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 7px 9px;
+}
+
+.quick-add__input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.button--ghost:hover {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+}
+
+.popup-status {
+  min-height: 18px;
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.popup-status--error {
+  color: var(--stamp);
+  font-weight: 700;
+}
+
+.popup-foot {
+  display: flex;
+  gap: 6px;
+}
+
+.popup-foot .button {
+  flex: 1 1 0;
+}
+
+/* 현재 필터링 방식 표시 줄 (칠하기 모드일 때는 색상 스와치도 보여준다) */
+
+.mode-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 12px;
+}
+
+.mode-line__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.mode-line__value {
+  font-weight: 700;
+}
+
+/* 체크 무늬 위에 현재 컬러를 올려 Opacity 가 낮을 때의 투명도까지 보여 준다 */
+
+.mode-line__swatch {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--ink);
+  background-image: linear-gradient(45deg, var(--checker) 25%, transparent 25%, transparent 75%, var(--checker) 75%),
+    linear-gradient(45deg, var(--checker) 25%, transparent 25%, transparent 75%, var(--checker) 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 4px 4px;
+}
+
+.mode-line__swatch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--current-filter-color, transparent);
+}
+
+.mode-line__color {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+.button--ghost:hover {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+}

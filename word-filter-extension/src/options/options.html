@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Word Filter 설정</title>
+    <!-- 실제 웹페이지에 주입되는 스타일시트를 그대로 링크한다.
+         미리보기가 실제 동작과 완전히 같은 규칙으로 렌더링되도록 하기 위한 것이다. -->
+    <link rel="stylesheet" href="../content/word_filter_styles.css" />
+    <link rel="stylesheet" href="../shared/theme.css" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="masthead">
+        <p class="masthead__eyebrow">Chrome Extension / Content Filter</p>
+        <h1 class="masthead__title">
+          <span class="masthead__word">WORD</span>
+          <span class="masthead__redacted">FILTER</span>
+        </h1>
+        <p class="masthead__lede">
+          등록한 <strong>텍스트 또는 정규표현식</strong>을 찾아 <strong>블록</strong> 또는
+          <strong>단어</strong> 단위로 지정한 컬러로 덮습니다. 엘리먼트를 제거하지 않으므로
+          레이아웃은 그대로 유지됩니다.
+        </p>
+      </header>
+
+      <section class="panel panel--preview" aria-labelledby="previewSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="previewSectionTitle">미리보기</h2>
+          <p class="panel__count" id="previewModeLabel">블록</p>
+        </div>
+        <div class="preview" id="previewContainer">
+          <p class="preview__line" data-preview-pattern="결말">마지막 회 결말이 진짜 충격적이었다</p>
+          <p class="preview__line" data-preview-pattern="스코어">오늘 경기 스코어는 3 대 2였습니다</p>
+          <p class="preview__line" data-preview-pattern="예고편">12화 예고편이 공개되었습니다</p>
+        </div>
+        <p class="preview__note">
+          각 줄의 예시 단어(<strong>결말 · 스코어 · 예고편</strong>)를 현재 모드와 컬러로 처리한
+          결과입니다. 등록한 패턴과는 무관하며, 실제 페이지와 같은 스타일시트로 렌더링됩니다.
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="commonSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="commonSectionTitle">공통 설정</h2>
+        </div>
+
+        <div class="setting">
+          <div class="setting__text">
+            <p class="setting__name">필터링 사용</p>
+            <p class="setting__desc">끄면 모든 탭에서 처리가 즉시 해제됩니다.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="filteringEnabledCheckbox" />
+            <span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>
+            <span class="switch__state" id="filteringEnabledStateLabel">사용 중</span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div class="setting__text">
+            <p class="setting__name">대소문자 구분</p>
+            <p class="setting__desc">
+              끄면 <code>Spoiler</code> 와 <code>spoiler</code> 를 같은 단어로 봅니다.
+            </p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="caseSensitiveCheckbox" />
+            <span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>
+            <span class="switch__state" id="caseSensitiveStateLabel">구분 안 함</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="modeSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="modeSectionTitle">필터링 모드</h2>
+          <p class="panel__count">처리 범위 선택</p>
+        </div>
+
+        <div class="mode-select" role="radiogroup" aria-labelledby="modeSectionTitle">
+          <label class="mode-option">
+            <input
+              type="radio"
+              name="filteringModeRadioGroup"
+              id="blockModeRadio"
+              value="block"
+            />
+            <span class="mode-option__body">
+              <span class="mode-option__name">블록</span>
+              <span class="mode-option__desc">
+                단어가 들어 있는 블록 엘리먼트(문단·카드·목록 항목) 전체를 덮습니다. 주변
+                문맥까지 함께 가려집니다.
+              </span>
+            </span>
+          </label>
+
+          <label class="mode-option">
+            <input type="radio" name="filteringModeRadioGroup" id="wordModeRadio" value="word" />
+            <span class="mode-option__body">
+              <span class="mode-option__name">단어</span>
+              <span class="mode-option__desc">
+                걸린 단어 위에만 덮습니다. 문장 나머지는 그대로 읽을 수 있어 특정 단어만
+                가리고 싶을 때 적합합니다.
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="colorSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="colorSectionTitle">필터링 컬러</h2>
+          <p class="panel__count" id="filterColorSummaryLabel">rgba(0, 0, 0, 1)</p>
+        </div>
+
+        <div class="setting setting--stacked">
+          <div class="setting__text">
+            <p class="setting__name">RGB</p>
+            <p class="setting__desc">기본값 0, 0, 0 (검정). 색상 상자를 눌러 고를 수도 있습니다.</p>
+          </div>
+          <div class="rgb-input">
+            <input
+              class="rgb-input__swatch"
+              type="color"
+              id="filterColorPickerInput"
+              value="#000000"
+              aria-label="색상 선택"
+            />
+            <label class="rgb-input__channel">
+              <span class="rgb-input__channel-name">R</span>
+              <input type="number" id="redChannelInput" min="0" max="255" step="1" value="0" />
+            </label>
+            <label class="rgb-input__channel">
+              <span class="rgb-input__channel-name">G</span>
+              <input type="number" id="greenChannelInput" min="0" max="255" step="1" value="0" />
+            </label>
+            <label class="rgb-input__channel">
+              <span class="rgb-input__channel-name">B</span>
+              <input type="number" id="blueChannelInput" min="0" max="255" step="1" value="0" />
+            </label>
+          </div>
+        </div>
+
+        <div class="setting setting--stacked">
+          <div class="setting__text">
+            <p class="setting__name">Opacity</p>
+            <p class="setting__desc">
+              1 = 색이 꽉 찬 블록(기본값) / 0 = 대상이 완전히 투명해 보이지 않음
+            </p>
+          </div>
+          <div class="slider">
+            <input
+              class="slider__input"
+              type="range"
+              id="filterOpacityRange"
+              min="0"
+              max="1"
+              step="0.05"
+              value="1"
+            />
+            <output class="slider__value" id="filterOpacityValueLabel">1.00</output>
+          </div>
+        </div>
+
+        <div class="color-actions">
+          <span class="color-actions__chip" id="filterColorChip" aria-hidden="true"></span>
+          <span class="color-actions__chip-label">현재 컬러</span>
+          <button class="button" type="button" id="resetFilterColorButton">기본값으로</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="patternSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="patternSectionTitle">필터링 패턴</h2>
+          <p class="panel__count" id="registeredPatternCountLabel">0개 등록</p>
+        </div>
+
+        <form class="pattern-form" id="addPatternForm" autocomplete="off">
+          <div class="type-select" role="radiogroup" aria-label="매칭 방식">
+            <label class="type-option">
+              <input
+                type="radio"
+                name="matchTypeRadioGroup"
+                id="textMatchTypeRadio"
+                value="text"
+                checked
+              />
+              <span class="type-option__label">텍스트</span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="matchTypeRadioGroup" id="regexMatchTypeRadio" value="regex" />
+              <span class="type-option__label">정규식</span>
+            </label>
+          </div>
+
+          <div class="pattern-form__row">
+            <input
+              class="pattern-form__input"
+              id="newPatternInput"
+              type="text"
+              placeholder="예: 스포일러"
+              spellcheck="false"
+            />
+            <button class="button button--primary" type="submit" id="addPatternButton">추가</button>
+          </div>
+
+          <p class="pattern-form__hint" id="patternInputHint">
+            부분 일치로 동작합니다. "결말"을 등록하면 "결말 주의"가 포함된 문단도 처리됩니다.
+          </p>
+          <p class="regex-feedback" id="regexFeedbackMessage" role="status" aria-live="polite" hidden></p>
+        </form>
+
+        <p class="status" id="statusMessage" role="status" aria-live="polite"></p>
+
+        <ul class="word-list" id="filteredPatternList"></ul>
+        <p class="word-list__empty" id="emptyPatternListMessage">
+          등록된 패턴이 없습니다. 위에 추가하면 열려 있는 탭에 바로 적용됩니다.
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="transferSectionTitle">
+        <div class="panel__head">
+          <h2 class="panel__title" id="transferSectionTitle">백업 및 복원</h2>
+          <p class="panel__count">JSON 파일</p>
+        </div>
+
+        <p class="transfer-note">
+          <strong>패턴 · 필터링 모드 · 컬러 · 대소문자 구분</strong>을 한 파일에 담습니다.
+          확장을 제거하거나 다른 폴더에서 새로 로드하기 <strong>전에</strong> 내보내 두면
+          그대로 되돌릴 수 있습니다. 복원은 현재 설정을 전부 덮어씁니다.
+        </p>
+
+        <div class="transfer-controls">
+          <button class="button" type="button" id="exportSettingsButton">설정 백업 저장</button>
+          <button class="button" type="button" id="restoreSettingsButton">백업 파일로 복원</button>
+          <input
+            type="file"
+            id="restoreFileInput"
+            accept=".json,application/json"
+            hidden
+            aria-hidden="true"
+          />
+        </div>
+
+        <p class="status" id="transferStatusMessage" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <script src="../shared/filter_settings_storage.js"></script>
+    <script src="../shared/filter_apply_helper.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

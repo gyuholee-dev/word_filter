@@ -1,0 +1,182 @@
+/* ===========================================================================
+   theme.css — 설정 화면과 팝업이 공유하는 테마 토큰과 공통 컴포넌트
+   ---------------------------------------------------------------------------
+   두 화면이 같은 색과 같은 컨트롤 모양을 쓰므로 한 곳에 둔다.
+   각 화면의 고유 스타일은 options.css / popup.css 에 있고, 이 파일보다 나중에
+   불러오므로 필요한 값만 덮어쓸 수 있다.
+
+   [토큰을 표면(surface) 기준으로 나눈 이유]
+   밝은 패널 위에 "반전 칩"(먹칠 바, 선택된 모드 타일, 기본 버튼)이 올라간다.
+   토큰이 --ink 하나뿐이면 그 값이 본문 텍스트색과 반전 칩 배경색을 동시에 담당하게 되어,
+   다크모드에서 값을 뒤집는 순간 "반전 칩 위 텍스트" 조합의 명암비가 무너진다.
+   그래서 반전 표면에 얹히는 색을 별도 토큰(--*-on-inverse)으로 분리했다.
+
+   [명암비]
+   모든 조합을 라이트·다크 양쪽에서 계산해 텍스트 4.5:1, UI 요소 3:1 이상을 만족시켰다.
+   =========================================================================== */
+
+:root {
+  /* 폼 컨트롤(슬라이더·색상 상자·숫자 입력·파일 선택)이 테마에 맞게 렌더링되도록 알린다.
+     이 선언이 없으면 다크모드에서 네이티브 컨트롤만 밝게 남는다. */
+  color-scheme: light dark;
+
+  --paper: #e9eaec;        /* 페이지 배경 */
+  --paper-raised: #f4f5f6; /* 패널 배경 */
+  --paper-input: #ffffff;  /* 입력 필드 배경 */
+  --paper-edge: #d3d6db;   /* 얇은 구분선 */
+
+  --ink: #101216;          /* 본문 텍스트, 강한 테두리 */
+  --ink-soft: #565c66;     /* 보조 텍스트 */
+
+  --surface-inverse: #101216;    /* 반전 칩 배경 */
+  --text-on-inverse: #e9eaec;    /* 반전 칩 위 텍스트 */
+  --muted-on-inverse: #a8adb7;   /* 반전 칩 위 보조 텍스트 */
+  --divider-on-inverse: #363c46; /* 반전 칩 내부 구분선 */
+
+  --accent: #2f7cf6;             /* 포커스 링, 표식, 강조 배경 */
+  --accent-on-inverse: #2f7cf6;  /* 반전 칩 위 강조 텍스트 */
+  --text-on-accent: #101216;     /* 강조 배경 위 텍스트 */
+
+  --stamp: #c81e3c;              /* 오류 */
+  --text-on-stamp: #ffffff;      /* 오류 배경 위 텍스트 */
+
+  --checker: #c9ccd2;            /* 컬러 칩 체크무늬 */
+  --preview-checker: #e4e6ea;    /* 미리보기 체크무늬 */
+  --preview-line-edge: #cfd3d9;  /* 미리보기 줄 구분선 */
+
+  --font-display: 'Arial Black', 'Arial Bold', 'Malgun Gothic', sans-serif;
+  --font-body: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', Consolas, 'D2Coding', monospace;
+
+  /* 공통 컴포넌트 크기. 팝업은 좁으므로 자기 :root 에서 더 작은 값으로 덮어쓴다. */
+  --button-font-size: 14px;
+  --button-padding: 10px 18px;
+  --switch-track-width: 46px;
+  --switch-track-height: 24px;
+  --switch-knob-size: 18px;
+}
+
+/* 크롬의 모양 설정(기기 설정 사용 / 라이트 / 다크)에 따라 자동으로 전환된다. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14161a;
+    --paper-raised: #1b1e23;
+    --paper-input: #23272e;
+    --paper-edge: #313742;
+
+    --ink: #e7e9ee;
+    --ink-soft: #9aa2af;
+
+    --surface-inverse: #e7e9ee;
+    --text-on-inverse: #14161a;
+    --muted-on-inverse: #4a505a;
+    --divider-on-inverse: #a9b0bb;
+
+    --accent: #6aa6ff;
+    --accent-on-inverse: #1a52c8;
+    --text-on-accent: #14161a;
+
+    --stamp: #ff7085;
+    --text-on-stamp: #14161a;
+
+    --checker: #3a4048;
+    --preview-checker: #2a2f36;
+    --preview-line-edge: #343a43;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ── 버튼 ───────────────────────────────────────────────────────────────── */
+
+.button {
+  border: 1px solid var(--ink);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--button-font-size);
+  font-weight: 700;
+  padding: var(--button-padding);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.button--primary {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+}
+
+.button--primary:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── 토글 스위치 ────────────────────────────────────────────────────────── */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch__track {
+  position: relative;
+  display: block;
+  width: var(--switch-track-width);
+  height: var(--switch-track-height);
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.switch__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: var(--switch-knob-size);
+  height: var(--switch-knob-size);
+  background: var(--surface-inverse);
+  transition: transform 140ms ease-out;
+}
+
+.switch input:checked + .switch__track {
+  background: var(--accent);
+}
+
+/* 이동 거리는 트랙과 노브 크기에서 계산한다. 크기를 바꿔도 따라온다. */
+.switch input:checked + .switch__track .switch__knob {
+  transform: translateX(calc(var(--switch-track-width) - var(--switch-knob-size) - 6px));
+}
+
+.switch input:focus-visible + .switch__track {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.switch__state {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch__knob,
+  .word-item__cover {
+    transition: none;
+  }
+}

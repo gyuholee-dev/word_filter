@@ -1,0 +1,628 @@
+/* 설정 화면 고유 스타일. 공통 토큰과 컴포넌트는 ../shared/theme.css 에 있다.
+   콘셉트: "먹칠(redaction) 문서" — 확장이 하는 일(가려서 안 보이게 하기)을 UI 가 그대로 보여 준다. */
+
+body {
+  margin: 0;
+  padding: 48px 24px 72px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--surface-inverse);
+  color: var(--accent-on-inverse);
+  padding: 1px 5px;
+}
+
+/* ── 헤더 ───────────────────────────────────────────────────────────────── */
+
+.masthead {
+  margin-bottom: 40px;
+}
+
+.masthead__eyebrow {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.masthead__title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 7vw, 54px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.masthead__redacted {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  padding: 2px 12px 4px;
+}
+
+.masthead__lede {
+  max-width: 52ch;
+  margin: 18px 0 0;
+  color: var(--ink-soft);
+}
+
+/* ── 패널 ───────────────────────────────────────────────────────────────── */
+
+.panel {
+  border: 1px solid var(--ink);
+  background: var(--paper-raised);
+  padding: 22px 24px 26px;
+  margin-bottom: 22px;
+}
+
+.panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--paper-edge);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.panel__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.panel__count {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+/* ── 단어 추가 폼 ───────────────────────────────────────────────────────── */
+
+.pattern-form {
+  margin: 0;
+}
+
+.pattern-form__row {
+  display: flex;
+  gap: 10px;
+}
+
+.pattern-form__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper-input);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 10px 12px;
+}
+
+.pattern-form__input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.pattern-form__hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ── 상태 메시지 ────────────────────────────────────────────────────────── */
+
+.status {
+  min-height: 20px;
+  margin: 12px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.status--error {
+  color: var(--stamp);
+  font-weight: 700;
+}
+
+.status--done {
+  color: var(--text-on-accent);
+  background: var(--accent);
+  display: inline-block;
+  padding: 1px 8px;
+}
+
+/* ── 단어 목록: 이 화면의 시그니처 요소 ─────────────────────────────────── */
+
+.word-list {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.word-item {
+  display: flex;
+  align-items: stretch;
+  border-left: 4px solid var(--accent);
+  background: var(--surface-inverse);
+}
+
+.word-item__bar {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 14px;
+  overflow: hidden;
+}
+
+/* 실제 단어는 항상 자리에 있고, 그 위를 덮은 커버의 opacity 를 낮춰 드러낸다.
+   확장 프로그램이 페이지에서 하는 동작과 정확히 같은 방식이다. */
+
+.word-item__text {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-on-inverse);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.word-item__cover {
+  position: absolute;
+  inset: 4px 6px;
+  background: var(--surface-inverse);
+  opacity: 1;
+  transition: opacity 180ms ease-out;
+}
+
+.word-item:hover .word-item__cover,
+.word-item:focus-within .word-item__cover {
+  opacity: 0;
+}
+
+.word-item__delete {
+  flex: 0 0 auto;
+  border: 0;
+  border-left: 1px solid var(--divider-on-inverse);
+  background: transparent;
+  color: var(--text-on-inverse);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.word-item__delete:hover {
+  background: var(--stamp);
+  color: var(--text-on-stamp);
+}
+
+.word-item__delete:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.word-list__empty {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.word-list__empty[hidden] {
+  display: none;
+}
+
+/* ── 개별 설정 행 ───────────────────────────────────────────────────────── */
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--paper-edge);
+}
+
+.setting:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.setting--stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.setting__text {
+  min-width: 0;
+}
+
+.setting__name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.setting__desc {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ── 토글 스위치 ────────────────────────────────────────────────────────── */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+/* ── 슬라이더 ───────────────────────────────────────────────────────────── */
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.slider__input {
+  flex: 1 1 auto;
+  accent-color: var(--ink);
+}
+
+.slider__input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.slider__value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface-inverse);
+  color: var(--accent-on-inverse);
+  padding: 2px 8px;
+  min-width: 56px;
+  text-align: center;
+}
+
+/* ── 미리보기 ───────────────────────────────────────────────────────────── */
+
+.preview {
+  border: 1px dashed var(--ink);
+  padding: 8px 14px;
+  background: var(--paper-input);
+}
+
+.preview__line {
+  margin: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--paper-edge);
+}
+
+.preview__line:last-child {
+  border-bottom: 0;
+}
+
+.preview__note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ── 필터링 모드 선택 (라디오 타일) ─────────────────────────────────────── */
+
+.mode-select {
+  display: grid;
+  gap: 8px;
+}
+
+.mode-option {
+  display: block;
+  position: relative;
+  border: 1px solid var(--paper-edge);
+  border-left: 4px solid var(--paper-edge);
+  padding: 12px 14px;
+  cursor: pointer;
+  background: var(--paper-input);
+}
+
+.mode-option input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.mode-option__body {
+  display: block;
+}
+
+.mode-option__name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  margin-bottom: 3px;
+}
+
+.mode-option__desc {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* 선택된 모드만 검정 + 강조 컬러 표식으로 강하게 구분한다 */
+
+.mode-option:has(input:checked) {
+  background: var(--surface-inverse);
+  border-color: var(--surface-inverse);
+  border-left-color: var(--accent);
+}
+
+.mode-option:has(input:checked) .mode-option__name {
+  color: var(--text-on-inverse);
+}
+
+.mode-option:has(input:checked) .mode-option__desc {
+  color: var(--muted-on-inverse);
+}
+
+.mode-option:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── 필터링 컬러 ────────────────────────────────────────────────────────── */
+
+.rgb-input {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.rgb-input__swatch {
+  width: 52px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: none;
+  cursor: pointer;
+}
+
+.rgb-input__channel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rgb-input__channel-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.rgb-input__channel input {
+  width: 72px;
+  border: 1px solid var(--ink);
+  background: var(--paper-input);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 8px 10px;
+}
+
+.rgb-input__swatch:focus-visible,
+.rgb-input__channel input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.color-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  border-top: 1px dashed var(--paper-edge);
+  padding-top: 16px;
+}
+
+/* 현재 컬러 칩: 체크 무늬 위에 색을 올려 Opacity 가 낮을 때의 투명도를 보여 준다 */
+
+.color-actions__chip {
+  width: 42px;
+  height: 26px;
+  border: 1px solid var(--ink);
+  background-image: linear-gradient(45deg, var(--checker) 25%, transparent 25%, transparent 75%, var(--checker) 75%),
+    linear-gradient(45deg, var(--checker) 25%, transparent 25%, transparent 75%, var(--checker) 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 5px 5px;
+  position: relative;
+}
+
+.color-actions__chip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--current-filter-color, transparent);
+}
+
+.color-actions__chip-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-right: auto;
+}
+
+/* ── 미리보기: 투명도를 눈으로 확인할 수 있게 체크 무늬 배경 ────────────── */
+
+.panel--preview .preview {
+  background-color: var(--paper-input);
+  background-image: linear-gradient(45deg, var(--preview-checker) 25%, transparent 25%, transparent 75%, var(--preview-checker) 75%),
+    linear-gradient(45deg, var(--preview-checker) 25%, transparent 25%, transparent 75%, var(--preview-checker) 75%);
+  background-size: 14px 14px;
+  background-position: 0 0, 7px 7px;
+}
+
+.panel--preview .preview__line {
+  border-bottom-color: var(--preview-line-edge);
+}
+
+/* ── 백업 및 복원 ───────────────────────────────────────────────────────── */
+
+.transfer-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--accent);
+  background: var(--paper-input);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.transfer-note strong {
+  color: var(--ink);
+}
+
+.transfer-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+/* ── 매칭 방식 선택 (텍스트 / 정규식) ───────────────────────────────────── */
+
+.type-select {
+  display: inline-flex;
+  border: 1px solid var(--ink);
+  margin-bottom: 12px;
+}
+
+.type-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.type-option input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.type-option__label {
+  display: block;
+  padding: 7px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+}
+
+.type-option + .type-option .type-option__label {
+  border-left: 1px solid var(--ink);
+}
+
+.type-option:has(input:checked) .type-option__label {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+}
+
+.type-option:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── 정규식 실시간 검증 메시지 ──────────────────────────────────────────── */
+
+.regex-feedback {
+  margin: 8px 0 0;
+  padding: 7px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border-left: 4px solid var(--accent);
+  background: var(--paper-input);
+  color: var(--ink-soft);
+  word-break: break-all;
+}
+
+.regex-feedback[hidden] {
+  display: none;
+}
+
+.regex-feedback--invalid {
+  border-left-color: var(--stamp);
+  color: var(--stamp);
+  font-weight: 700;
+}
+
+/* ── 패턴 목록의 타입 배지 ──────────────────────────────────────────────── */
+
+.word-item__type {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-right: 1px solid var(--divider-on-inverse);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-on-inverse);
+}
+
+/* 정규식 항목은 배지를 강조 컬러로 구분한다 */
+
+.word-item--regex {
+  border-left-color: var(--accent);
+}
+
+.word-item--regex .word-item__type {
+  color: var(--accent-on-inverse);
+}
+
+.word-item--text {
+  border-left-color: var(--ink-soft);
+}
+
+/* 켜짐/꺼짐 글자 길이가 달라도 스위치가 흔들리지 않도록 폭을 고정한다 */
+
+.switch__state {
+  min-width: 60px;
+}
+
+.switch {
+  flex: 0 0 auto;
+}

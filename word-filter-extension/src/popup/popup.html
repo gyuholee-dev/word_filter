@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Word Filter</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="popup-head">
+      <span class="popup-head__mark">WORD<span class="popup-head__mark-bar">FILTER</span></span>
+    </header>
+
+    <section class="tally">
+      <p class="tally__number" id="filteredTargetCountLabel">–</p>
+      <p class="tally__caption" id="filteredTargetCountCaption">이 페이지에서 처리한 항목</p>
+    </section>
+
+    <p class="mode-line">
+      <span class="mode-line__label">모드</span>
+      <span class="mode-line__value" id="currentModeValueLabel">블록</span>
+      <span class="mode-line__swatch" id="currentFilterColorSwatch"></span>
+      <span class="mode-line__color" id="currentFilterColorSummary">rgba(0, 0, 0, 1)</span>
+    </p>
+
+    <div class="popup-row">
+      <label class="switch">
+        <input type="checkbox" id="filteringEnabledCheckbox" />
+        <span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>
+        <span class="switch__state" id="filteringEnabledStateLabel">사용 중</span>
+      </label>
+    </div>
+
+    <form class="quick-add" id="quickAddWordForm" autocomplete="off">
+      <label class="quick-add__label" for="quickAddWordInput">단어 빠르게 추가 (텍스트)</label>
+      <div class="quick-add__row">
+        <input
+          class="quick-add__input"
+          id="quickAddWordInput"
+          type="text"
+          placeholder="단어 입력"
+          maxlength="80"
+          spellcheck="false"
+        />
+        <button class="button button--primary" type="submit">추가</button>
+      </div>
+    </form>
+
+    <p class="popup-status" id="popupStatusMessage" role="status" aria-live="polite"></p>
+
+    <footer class="popup-foot">
+      <button class="button button--ghost" type="button" id="openOptionsPageButton">
+        전체 설정 열기
+      </button>
+      <button class="button button--ghost" type="button" id="reapplyFilterButton">
+        지금 다시 적용
+      </button>
+    </footer>
+
+    <script src="../shared/filter_settings_storage.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
