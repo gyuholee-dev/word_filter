@@ -21,50 +21,58 @@
      이 선언이 없으면 다크모드에서 네이티브 컨트롤만 밝게 남는다. */
   color-scheme: light dark;
 
-  /* ── 팔레트: 색 값은 여기에만 적는다 ── */
-  --light-paper: #e9eaec;               /* 페이지 배경 */
-  --light-paper-raised: #f4f5f6;        /* 패널 배경 */
+  /* ── 팔레트: 색 값은 여기에만 적는다 ──
+     유채색은 강조(accent)와 오류(stamp) 둘뿐이고 나머지는 전부 무채색이다.
+     오류는 색으로 위험을 알려야 하므로 빨강을 유지한다. 회색은 용도별로 밝기를 나눈다. */
+  --light-paper: #ededed;               /* 페이지 배경 */
+  --light-paper-raised: #f7f7f7;        /* 패널 배경 */
   --light-paper-input: #ffffff;         /* 입력 필드 배경 */
-  --light-paper-edge: #d3d6db;          /* 얇은 구분선 */
-  --light-ink: #101216;                 /* 본문 텍스트, 강한 테두리 */
-  --light-ink-soft: #565c66;            /* 보조 텍스트 */
-  --light-surface-inverse: #101216;     /* 반전 칩 배경 */
-  --light-text-on-inverse: #e9eaec;     /* 반전 칩 위 텍스트 */
-  --light-muted-on-inverse: #a8adb7;    /* 반전 칩 위 보조 텍스트 */
-  --light-divider-on-inverse: #363c46;  /* 반전 칩 내부 구분선 */
-  --light-accent: #2f7cf6;              /* 포커스 링, 표식, 강조 배경 */
+  --light-border: #949494;              /* 조작 가능한 컨트롤 외곽선 (입력창·버튼·스위치) — 3:1 확보 */
+  --light-border-soft: #a8a8a8;         /* 패널 외곽선 — 부드럽게 */
+  --light-border-subtle: #dadada;       /* 패널 안쪽 구분선 — 가장 옅게 */
+  --light-ink: #1a1a1a;                 /* 본문 텍스트 */
+  --light-ink-soft: #5c5c5c;            /* 보조 텍스트 */
+  --light-surface-inverse: #141414;     /* 반전 칩 배경 */
+  --light-text-on-inverse: #f2f2f2;     /* 반전 칩 위 텍스트 */
+  --light-muted-on-inverse: #adadad;    /* 반전 칩 위 보조 텍스트 */
+  --light-divider-on-inverse: #3d3d3d;  /* 반전 칩 내부 구분선 */
+  --light-accent: #2f7cf6;              /* 강조 — 유일한 유채색 */
   --light-accent-on-inverse: #2f7cf6;   /* 반전 칩 위 강조 텍스트 */
-  --light-text-on-accent: #101216;      /* 강조 배경 위 텍스트 */
+  --light-text-on-accent: #111111;      /* 강조 배경 위 텍스트 */
   --light-stamp: #c81e3c;               /* 오류 */
   --light-text-on-stamp: #ffffff;       /* 오류 배경 위 텍스트 */
-  --light-checker: #c9ccd2;             /* 컬러 칩 체크무늬 */
-  --light-preview-checker: #e4e6ea;     /* 미리보기 체크무늬 */
-  --light-preview-line-edge: #cfd3d9;   /* 미리보기 줄 구분선 */
+  --light-checker: #cccccc;             /* 컬러 칩 체크무늬 */
+  --light-preview-checker: #e2e2e2;     /* 미리보기 체크무늬 */
+  --light-preview-line-edge: #d4d4d4;   /* 미리보기 줄 구분선 */
 
-  --dark-paper: #14161a;
-  --dark-paper-raised: #1b1e23;
-  --dark-paper-input: #23272e;
-  --dark-paper-edge: #313742;
-  --dark-ink: #e7e9ee;
-  --dark-ink-soft: #9aa2af;
-  --dark-surface-inverse: #e7e9ee;
-  --dark-text-on-inverse: #14161a;
-  --dark-muted-on-inverse: #4a505a;
-  --dark-divider-on-inverse: #a9b0bb;
+  --dark-paper: #171717;
+  --dark-paper-raised: #1f1f1f;
+  --dark-paper-input: #292929;
+  --dark-border: #767676;
+  --dark-border-soft: #565656;
+  --dark-border-subtle: #343434;
+  --dark-ink: #e8e8e8;
+  --dark-ink-soft: #a2a2a2;
+  --dark-surface-inverse: #e8e8e8;
+  --dark-text-on-inverse: #171717;
+  --dark-muted-on-inverse: #4f4f4f;
+  --dark-divider-on-inverse: #b0b0b0;
   --dark-accent: #6aa6ff;
   --dark-accent-on-inverse: #1a52c8;
-  --dark-text-on-accent: #14161a;
+  --dark-text-on-accent: #171717;
   --dark-stamp: #ff7085;
-  --dark-text-on-stamp: #14161a;
-  --dark-checker: #3a4048;
-  --dark-preview-checker: #2a2f36;
-  --dark-preview-line-edge: #343a43;
+  --dark-text-on-stamp: #171717;
+  --dark-checker: #3d3d3d;
+  --dark-preview-checker: #2b2b2b;
+  --dark-preview-line-edge: #363636;
 
   /* ── 기본 매핑: 라이트 ── */
   --paper: var(--light-paper);
   --paper-raised: var(--light-paper-raised);
   --paper-input: var(--light-paper-input);
-  --paper-edge: var(--light-paper-edge);
+  --border: var(--light-border);
+  --border-soft: var(--light-border-soft);
+  --border-subtle: var(--light-border-subtle);
   --ink: var(--light-ink);
   --ink-soft: var(--light-ink-soft);
   --surface-inverse: var(--light-surface-inverse);
@@ -100,7 +108,9 @@
     --paper: var(--dark-paper);
     --paper-raised: var(--dark-paper-raised);
     --paper-input: var(--dark-paper-input);
-    --paper-edge: var(--dark-paper-edge);
+    --border: var(--dark-border);
+    --border-soft: var(--dark-border-soft);
+    --border-subtle: var(--dark-border-subtle);
     --ink: var(--dark-ink);
     --ink-soft: var(--dark-ink-soft);
     --surface-inverse: var(--dark-surface-inverse);
@@ -130,7 +140,9 @@
   --paper: var(--dark-paper);
   --paper-raised: var(--dark-paper-raised);
   --paper-input: var(--dark-paper-input);
-  --paper-edge: var(--dark-paper-edge);
+  --border: var(--dark-border);
+  --border-soft: var(--dark-border-soft);
+  --border-subtle: var(--dark-border-subtle);
   --ink: var(--dark-ink);
   --ink-soft: var(--dark-ink-soft);
   --surface-inverse: var(--dark-surface-inverse);
@@ -154,7 +166,7 @@
 /* ── 버튼 ───────────────────────────────────────────────────────────────── */
 
 .button {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border);
   background: var(--paper-raised);
   color: var(--ink);
   font-family: var(--font-body);
@@ -201,7 +213,7 @@
   display: block;
   width: var(--switch-track-width);
   height: var(--switch-track-height);
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border);
   background: var(--paper);
 }
 
@@ -247,7 +259,7 @@
 /* 설정 화면과 패턴 편집 페이지가 같은 패널·목록 모양을 쓰므로 여기에 둔다. */
 
 .panel {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border-soft);
   background: var(--paper-raised);
   padding: 22px 24px 26px;
   margin-bottom: 22px;
@@ -258,7 +270,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid var(--paper-edge);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 12px;
   margin-bottom: 20px;
 }
@@ -412,7 +424,7 @@
 
 .type-select {
   display: inline-flex;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border);
 }
 
 .type-option {
@@ -438,7 +450,7 @@
 }
 
 .type-option + .type-option .type-option__label {
-  border-left: 1px solid var(--ink);
+  border-left: 1px solid var(--border);
 }
 
 .type-option:has(input:checked) .type-option__label {
@@ -487,7 +499,7 @@
 .pattern-form__input {
   flex: 1 1 auto;
   min-width: 0;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border);
   background: var(--paper-input);
   color: var(--ink);
   font-family: var(--font-body);

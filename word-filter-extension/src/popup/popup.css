@@ -50,7 +50,7 @@ body {
 /* 팝업의 주인공: 이 페이지에서 몇 개를 숨겼는지 */
 
 .tally {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border-soft);
   background: var(--paper-raised);
   padding: 12px 14px 14px;
   margin: 0 0 12px;
@@ -79,7 +79,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  border-top: 1px solid var(--paper-edge);
+  border-top: 1px solid var(--border-subtle);
   margin-bottom: 8px;
 }
 
@@ -112,7 +112,7 @@ body {
 .quick-add__input {
   flex: 1 1 auto;
   min-width: 0;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border);
   background: var(--paper-input);
   color: var(--ink);
   font-family: var(--font-body);
@@ -160,7 +160,7 @@ body {
   gap: 8px;
   margin: 0 0 12px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--paper-edge);
+  border-bottom: 1px solid var(--border-subtle);
   font-size: 12px;
 }
 
@@ -182,7 +182,7 @@ body {
   position: relative;
   width: 16px;
   height: 16px;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border);
   background-image: linear-gradient(45deg, var(--checker) 25%, transparent 25%, transparent 75%, var(--checker) 75%),
     linear-gradient(45deg, var(--checker) 25%, transparent 25%, transparent 75%, var(--checker) 75%);
   background-size: 8px 8px;

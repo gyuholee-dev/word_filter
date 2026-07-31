@@ -49,7 +49,7 @@ body {
 .pattern-search__input {
   flex: 1 1 auto;
   min-width: 0;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--border);
   background: var(--paper-input);
   color: var(--ink);
   font-family: var(--font-body);

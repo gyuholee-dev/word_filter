@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Word Filter - 단어 필터링",
-  "version": "1.11.0",
+  "version": "1.12.1",
   "description": "등록한 텍스트 또는 정규표현식을 블록/단어 단위로 지정한 컬러(RGB + Opacity)로 필터링합니다.",
   "permissions": [
     "storage",
