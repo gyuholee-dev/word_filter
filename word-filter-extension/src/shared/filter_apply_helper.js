@@ -162,7 +162,26 @@
   }
 
   /**
-   * 블록 모드용: 텍스트에 걸리는 첫 패턴을 찾는다. 있으면 그 패턴, 없으면 null.
+   * HTML 의 원본 텍스트를 "화면에 보이는 문자열"로 맞춘다.
+   *
+   * HTML 은 들여쓰기와 줄바꿈이 텍스트에 그대로 남지만 화면에서는 공백 하나로 합쳐져 보인다.
+   * 예: "\t\n\n부산 ARS 투표 안내!(펌)\t\t\n" → "부산 ARS 투표 안내!(펌)"
+   *
+   * 사용자는 보이는 대로 패턴을 쓰므로 판정도 보이는 문자열을 기준으로 해야 한다.
+   * 특히 ^ 와 $ 앵커는 앞뒤 공백을 잘라내지 않으면 의도대로 동작하지 않는다.
+   *
+   * @param {string} rawText
+   * @returns {string}
+   */
+  function normalizeVisibleText(rawText) {
+    return (rawText ?? '').replace(/\s+/g, ' ').trim();
+  }
+
+  /**
+   * 블록 모드용: 주어진 텍스트에 걸리는 첫 패턴을 찾는다. 있으면 그 패턴, 없으면 null.
+   *
+   * 텍스트 노드 하나가 아니라 **블록 전체의 텍스트**를 받는다. 화면상 한 문장이
+   * 여러 엘리먼트로 쪼개져 있어도(예: <a>제목</a><b>(펌)</b>) 이어 붙은 문자열로 판정된다.
    *
    * 정규식은 'g' 플래그가 붙어 있어 test() 가 lastIndex 를 전진시킨다. 같은 정규식 객체를
    * 여러 텍스트 노드에 재사용하므로 **호출 전에 반드시 lastIndex 를 0 으로 되돌려야**
@@ -174,16 +193,20 @@
    * @returns {string | null} 매칭된 패턴 문자열
    */
   function findFirstMatchingPattern(sourceText, compiledPatternList, shouldMatchCaseSensitively) {
-    if (!sourceText || compiledPatternList.length === 0) return null;
+    if (compiledPatternList.length === 0) return null;
 
-    const comparableText = buildComparableText(sourceText, shouldMatchCaseSensitively);
+    // 여러 엘리먼트에 걸친 텍스트를 판정하므로 들여쓰기·줄바꿈을 걷어낸 뒤 비교한다
+    const visibleText = normalizeVisibleText(sourceText);
+    if (visibleText.length === 0) return null;
+
+    const comparableText = buildComparableText(visibleText, shouldMatchCaseSensitively);
 
     for (let patternIndex = 0; patternIndex < compiledPatternList.length; patternIndex += 1) {
       const compiledPattern = compiledPatternList[patternIndex];
 
       if (compiledPattern.regex) {
         compiledPattern.regex.lastIndex = 0;
-        if (compiledPattern.regex.test(sourceText)) return compiledPattern.pattern;
+        if (compiledPattern.regex.test(visibleText)) return compiledPattern.pattern;
         continue;
       }
       if (comparableText.includes(compiledPattern.searchText)) return compiledPattern.pattern;

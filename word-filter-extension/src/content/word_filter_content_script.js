@@ -81,8 +81,24 @@
     'DL',
   ]);
 
-  /** display 값이 이 중 하나면 "블록 덩어리"가 아니므로 부모로 계속 올라간다 */
-  const INLINE_LIKE_DISPLAY_VALUES = new Set(['inline', 'contents', 'ruby', 'ruby-text']);
+  /**
+   * 이 display 값을 가진 엘리먼트는 "줄 안에 놓이는 조각"이므로 대상으로 삼지 않고 계속 올라간다.
+   *
+   * inline-block 계열을 포함하는 이유: 사이트가 제목 끝의 말머리를
+   * <b style="display:inline-block">(펌)</b> 처럼 감싸는 경우가 흔한데, 여기서 멈추면
+   * 한 줄 중 말머리 세 글자만 가려져 필터링이 안 먹은 것처럼 보인다.
+   * 인라인 레벨 박스는 문장의 일부이지 독립된 덩어리가 아니므로 통과시킨다.
+   */
+  const INLINE_LEVEL_DISPLAY_VALUES = new Set([
+    'inline',
+    'inline-block',
+    'inline-flex',
+    'inline-grid',
+    'inline-table',
+    'contents',
+    'ruby',
+    'ruby-text',
+  ]);
 
   /** 사용자가 직접 입력 중인 영역 셀렉터 (편집 방해 방지를 위해 제외) */
   const EDITABLE_AREA_SELECTOR = '[contenteditable="true"], [contenteditable=""]';
@@ -234,7 +250,7 @@
       lastSafeCandidateElement = candidateElement;
 
       const computedDisplay = window.getComputedStyle(candidateElement).display;
-      if (!INLINE_LIKE_DISPLAY_VALUES.has(computedDisplay)) {
+      if (!INLINE_LEVEL_DISPLAY_VALUES.has(computedDisplay)) {
         return candidateElement; // block / flex / grid / inline-block / list-item 등 → 여기서 멈춘다
       }
 
@@ -249,21 +265,22 @@
    * @returns {number} 새로 처리한 엘리먼트 수
    */
   function applyBlockFilterToMatchingElements(scannableTextNodeList) {
-    /** @type {Array<{targetElement: HTMLElement, matchedWord: string}>} */
-    const blockFilterTaskList = [];
-
+    // 1) 후보 블록을 먼저 모은다. 한 블록 안에 텍스트 노드가 여러 개여도 한 번만 검사한다.
+    /** @type {Set<HTMLElement>} */
+    const candidateBlockSet = new Set();
     scannableTextNodeList.forEach((textNode) => {
-      const matchedWord = findMatchedPatternInText(textNode.nodeValue ?? '');
-      if (!matchedWord) return;
-
       const targetElement = findBlockTargetElementFromTextNode(textNode);
-      if (!targetElement) return;
-
-      blockFilterTaskList.push({ targetElement, matchedWord });
+      if (targetElement) candidateBlockSet.add(targetElement);
     });
 
+    // 2) 판정은 텍스트 노드가 아니라 **블록 전체의 텍스트**로 한다.
+    //    화면상 한 문장이 여러 엘리먼트로 쪼개져 있어도(예: <a>제목</a><b>(펌)</b>)
+    //    이어 붙인 문자열에서 패턴을 찾을 수 있다.
     let newlyFilteredCount = 0;
-    blockFilterTaskList.forEach(({ targetElement, matchedWord }) => {
+    candidateBlockSet.forEach((targetElement) => {
+      const matchedWord = findMatchedPatternInText(targetElement.textContent ?? '');
+      if (!matchedWord) return;
+
       const didApply = applyBlockFilterToElement(
         targetElement,
         currentFilterSettings.filterColor,
